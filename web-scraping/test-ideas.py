@@ -11,34 +11,39 @@ def get_links(playwrigth: Playwright):
     chrome = playwrigth.chromium
     browser = chrome.launch(headless=False)
     page = browser.new_page()
+    page.route("**/*.{webp}", lambda route: route.abort())
     page.goto(url)
 
-    page.wait_for_selector("div.category-grid__item")
+    # handle cookie pop up window
+    cookie_pop_up = page.locator("div.CybotCookiebotDialogActive")
+    cookie_pop_up.wait_for()
+    page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")
 
-    html_content = page.content()
-    soup = BeautifulSoup(html_content, "html.parser")
+    while True:
+        page.wait_for_selector("div.category-grid__item")
+        html_content = page.content()
+        soup = BeautifulSoup(html_content, "html.parser")
 
-    # cards = soup.find_all("div", class_="category-grid__item")
+        # scrape links
+        cards = soup.find_all("a", class_="product-item product-brick")
+        for x in cards:
+            print(x["href"])
 
-    # for card in cards:
-    #     link = card.find("a", class_="product-item product-brick")
-    #     if link:
-    #         print(link["href"])
+        num = len(cards)
 
-    # find view more button is real?
-    # see_more = soup.find("div", class_="category-grid__item last-brick")
-    see_more = soup.find("span", string="see more")
-    if see_more:
-        print(see_more.text)
-    else:
-        print("nixya")
+        print(f"{num} -- {page.url}")
+
+        # handle pagination
+        next_page = soup.find("div", class_="category-grid__item last-brick")
+
+        if next_page:
+            page.locator("div.category-grid__item.last-brick").click()
+        else:
+            print("no more pages")
+            break
 
     browser.close()
 
-
-# vue-product-list-wrap > div.products-list-wrap__products > div.category-grid.category-grid--small-items > div:nth-child(2)
-# //*[@id="vue-product-list-wrap"]/div[2]/div[5]/div[2]
-# /html/body/div[1]/section[2]/div[1]/div[5]/div/div[2]/div[5]/div[2]
 
 with sync_playwright() as pw:
     get_links(pw)
