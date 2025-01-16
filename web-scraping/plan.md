@@ -16,9 +16,9 @@ balls: https://www.r-gol.com/en/footballs?filters=131%5B83115%5D%7e135%5B7586%2C
 
 ===================
 
-1. Identify which tool suits to my problem 
-2. How to not get banned
-3. Basic understanding for scraping
+1. tools: playwrith + bf4 + json
+2. how to not get banned?
+3. appraoch to scrape
 
 ===================
 
