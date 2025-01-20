@@ -19,5 +19,4 @@ balls: https://www.r-gol.com/en/footballs?filters=131%5B83115%5D%7e135%5B7586%2C
 
 plan
 
-2. separate code by function and blocks (perhaps severals files: functions, actual code and tranformation)
 3. handle product page data
