@@ -19,4 +19,28 @@ balls: https://www.r-gol.com/en/footballs?filters=131%5B83115%5D%7e135%5B7586%2C
 
 plan
 
-3. handle product page data
+**products**
+my_id | scraped_id | category_id | name | description | link
+
+**colors**
+product_id | color_id (id of the same product but with differet color and params)
+
+**sizes**
+size_id | product_id | size_num | in_stock
+
+**categories**
+category_id | category_name
+
+**category-boots**
+product_id | param-1 | param-2 | ...
+
+**category-balls**
+product_id | param-1 | param-2 | ...
+
+images
+-- boots
+-- product_id
+-- image
+-- balls
+-- product_id
+-- image

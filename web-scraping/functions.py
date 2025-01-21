@@ -1,7 +1,11 @@
 from playwright.sync_api import sync_playwright, Playwright
 from bs4 import BeautifulSoup
+from pathlib import Path
 import requests
 import re
+
+
+web_scraping_folder = Path.cwd() / "web-scraping"
 
 
 def handle_cookies(page):
@@ -37,6 +41,10 @@ def pagination(page, url):
         return True
     else:
         return False
+
+
+
+
 
 
 if __name__ == "__main__":

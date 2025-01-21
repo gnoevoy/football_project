@@ -2,7 +2,6 @@ from playwright.sync_api import sync_playwright, Playwright
 from functions import *
 import requests
 import json
-from pathlib import Path
 
 
 scraped_links = {
@@ -63,9 +62,9 @@ def run(playwrigth=Playwright):
 with sync_playwright() as pw:
     run(pw)
 
-# # file path
-# p = Path.cwd() / "web-scraping" / "data" / "scraped_links.json"
+# write scraped links to a json file
+path_to_file = web_scraping_folder / "data" / "scraped_links.json"
 
-# with open(p, "w") as f:
-#     json.dump(scraped_links, f)
-#     print("Data successfully saved to file!")
+with open(path_to_file, "w") as f:
+    json.dump(scraped_links, f, indent=4)
+    print("Data successfully saved to file!")
