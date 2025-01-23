@@ -20,7 +20,7 @@ balls: https://www.r-gol.com/en/footballs?filters=131%5B83115%5D%7e135%5B7586%2C
 plan
 
 **products**
-my_id | scraped_id | category_id | name | description | link
+my_id | scraped_id | category_id | name | price | description | link
 
 **colors**
 product_id | color_id (id of the same product but with differet color and params)

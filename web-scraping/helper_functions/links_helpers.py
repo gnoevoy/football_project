@@ -43,9 +43,5 @@ def pagination(page, url):
         return False
 
 
-
-
-
-
 if __name__ == "__main__":
     pass
