@@ -14,6 +14,12 @@ categories = []
 boots_category = []
 balls_category = []
 
+# path to raw_data
+raw_data_folder = web_scraping_folder / "data" / "raw_data"
+
+# path to product images
+images_folder = web_scraping_folder / "data" / "images"
+
 # open scraped links
 json_file_path = web_scraping_folder / "data" / "scraped_links.json"
 with open(json_file_path, "r") as f:
@@ -27,6 +33,9 @@ def run(playwrigth=Playwright):
     for category, data in links.items():
         links_lst = data["links"]
 
+        # images folder
+        category_folder = "boots" if category == "football_boots" else "balls"
+
         # open browser at catalog page
         chrome = playwrigth.chromium
         browser = chrome.launch(headless=False)
@@ -36,7 +45,7 @@ def run(playwrigth=Playwright):
         # handle cookies
         handle_cookies(page)
 
-        for link in links_lst[:1]:
+        for link in links_lst[:5]:
             page.goto(link)
 
             # render all content on the page
@@ -63,6 +72,9 @@ def run(playwrigth=Playwright):
                 balls_category.append(product_features)
 
             # upload images of product
+            get_product_images(
+                content, link, product_id, images_folder, category_folder
+            )
 
             product_id += 1
 
@@ -73,9 +85,15 @@ def run(playwrigth=Playwright):
 
         browser.close()
 
-    print(boots_category)
-    print(balls_category)
-
 
 with sync_playwright() as pw:
     run(pw)
+
+
+# store data in csv files
+pd.DataFrame(products).to_csv(raw_data_folder / "products.csv", index=False)
+pd.DataFrame(colors).to_csv(raw_data_folder / "colors.csv", index=False)
+pd.DataFrame(sizes).to_csv(raw_data_folder / "sizes.csv", index=False)
+pd.DataFrame(categories).to_csv(raw_data_folder / "categories.csv", index=False)
+pd.DataFrame(boots_category).to_csv(raw_data_folder / "boots_category.csv", index=False)
+pd.DataFrame(balls_category).to_csv(raw_data_folder / "balls_category.csv", index=False)

@@ -90,5 +90,20 @@ def get_product_features(content, product_id):
     return product_features
 
 
+def get_product_images(content, link, product_id, images_folder, category_folder):
+    images = content.find("div", class_="VueCarousel-inner")
+    image_num = 1
+
+    for image in images.find_all("img"):
+        link = image["src"]
+        data = requests.get(link).content
+        image_path = images_folder / category_folder / f"{product_id}-{image_num}.jpg"
+
+        with open(image_path, "wb") as f:
+            f.write(data)
+
+        image_num += 1
+
+
 if __name__ == "__main__":
     pass
