@@ -1,47 +1,51 @@
-from playwright.sync_api import sync_playwright, Playwright
+from playwright.sync_api import expect
 from bs4 import BeautifulSoup
 from pathlib import Path
 import requests
-import re
 
 
+# Path to the project folder for web scraping
 web_scraping_folder = Path.cwd() / "web-scraping"
 
 
 def handle_cookies(page):
+    """Handle the cookie consent pop-up."""
+
     cookie = page.locator("div.CybotCookiebotDialogActive")
     cookie.wait_for()
     page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")
+    expect(cookie).to_be_hidden()  # Ensure the pop-up is closed
 
 
 def get_total_items(page):
+    """Retrieve the total number of items from the catalog."""
+
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
-    total = soup.find("p", class_="products-list-controls-container__paragraph amount")
-    return int(total.text)
+    total_items = soup.find(
+        "p", class_="products-list-controls-container__paragraph amount"
+    )
+    assert total_items is not None  # Ensure the element exists
+    return int(total_items.text)
 
 
-def get_product_links(page):
+def get_product_links(page, page_num):
+    """Extract product links from the current catalog page."""
+
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
+
+    # Get product cards, excluding the "load more" button
     grid = soup.find("div", class_="category-grid category-grid--small-items")
     products = grid.select("div.category-grid__item:not(.last-brick)")
-    links = grid.find_all("a", class_=re.compile(r"\bproduct-item product-brick\b"))
-    page_links = [link["href"] for link in links]
 
-    return page_links, products
+    # Collect links from the product cards
+    links = [product.find("a")["href"] for product in products]
 
-
-def pagination(page, url):
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        page.goto(url)
-        page.wait_for_selector("div.category-grid__item")
-        return True
-    else:
-        return False
+    assert len(products) == len(links)  # Verify all products have links
+    print(f"page: {page_num}  |  links: {len(links)}")
+    return links
 
 
 if __name__ == "__main__":
-    pass
+    ...

@@ -4,6 +4,7 @@ import requests
 import json
 
 
+# Dictionary to store scraped links for each category
 scraped_links = {
     "football_boots": {
         "base_url": "https://www.r-gol.com/en/football-boots?filters=131%5B7502%5D%7e135%5B7586%2C7547%2C7504%2C8212%2C7617%5D%7e152%5B83011%5D",
@@ -19,52 +20,53 @@ scraped_links = {
 def run(playwrigth=Playwright):
     for category, data in scraped_links.items():
 
-        # open catalog page
-        chrome = playwrigth.chromium
-        browser = chrome.launch(headless=False)
+        # Launch browser and block webp images
+        browser = playwrigth.chromium.launch(headless=False)
         page = browser.new_page()
         page.route("**/*.{webp}", lambda route: route.abort())
 
-        # construct start page
+        # Navigate to the first page of the category
         page_num = 1
-        base_url = data["base_url"]
-        url = f"{base_url}&page={page_num}"
+        url = f"{data['base_url']}&page={page_num}"
+        assert requests.get(url).status_code == 200
         page.goto(url)
 
-        # handle cookies window
-        handle_cookies(page)
+        handle_cookies(page)  # Handle cookies pop-up
+        total_items = get_total_items(page)  # Get total items in the category
+        print(category)
 
-        # total items
-        total_items = get_total_items(page)
-        print(f"category: {category}")
-
-        # loop over pages
         while True:
-            # scrape links from product cards
-            links, products = get_product_links(page)
+            # Scrape product links from the current page
+            links = get_product_links(page, page_num)
             data["links"].extend(links)
-            print(f"page: {page_num} | items: {len(products)} | scraped: {len(links)}")
 
-            # handle pagination via status code of page
+            # Check the next page's availability
             page_num += 1
-            url = f"{base_url}&page={page_num}"
+            url = f"{data['base_url']}&page={page_num}"
+            response = requests.get(url)
 
-            if not pagination(page, url):
+            if response.status_code == 200:
+                page.goto(url)
+                page.wait_for_selector("div.category-grid__item")
+            else:
                 print("No more pages")
                 break
 
-        print("====================================")
-        print(f"total items: {total_items} | scraped: {len(data["links"])}")
+        # Verify all product links were scraped
+        assert total_items == len(data["links"])
+        print(f"Total items: {total_items}  |  Scraped links: {len(data['links'])}")
         print()
+
         browser.close()
 
 
 with sync_playwright() as pw:
     run(pw)
 
-# write scraped links to a json file
+# Save scraped links to a JSON file
 path_to_file = web_scraping_folder / "data" / "scraped_links.json"
 
 with open(path_to_file, "w") as f:
     json.dump(scraped_links, f, indent=4)
-    print("Data successfully saved to file!")
+    assert path_to_file.exists()
+    print("File was successfully written")
