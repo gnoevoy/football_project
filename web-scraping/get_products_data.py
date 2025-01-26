@@ -1,27 +1,22 @@
 from playwright.sync_api import sync_playwright, Playwright
-from helper_functions.links_helpers import handle_cookies, web_scraping_folder
+from helper_functions.links_helpers import handle_cookies, web_scraping_dir
 from helper_functions.products_helpers import *
-import requests
-from pathlib import Path
 import json
 import pandas as pd
+import traceback
+import logging
 
-# tabel for db
-products = []
-colors = []
-sizes = []
-categories = []
-boots_category = []
-balls_category = []
 
-# path to raw_data
-raw_data_folder = web_scraping_folder / "data" / "raw_data"
+# Initialize lists to store data for CSV files
+products, colors, sizes = [], [], []
+categories, boots_category, balls_category = [], [], []
 
-# path to product images
-images_folder = web_scraping_folder / "data" / "images"
+# Define paths for raw data and product images
+raw_data_folder = web_scraping_dir / "data" / "raw_data"
+images_folder = web_scraping_dir / "data" / "images"
 
-# open scraped links
-json_file_path = web_scraping_folder / "data" / "scraped_links.json"
+# Load scraped links from JSON file
+json_file_path = web_scraping_dir / "data" / "scraped_links.json"
 with open(json_file_path, "r") as f:
     links = json.load(f)
 
@@ -32,68 +27,99 @@ def run(playwrigth=Playwright):
 
     for category, data in links.items():
         links_lst = data["links"]
+        counter = 1
+        print(category)
+        try:
+            # Open browser and navigate to the catalog page
+            chrome = playwrigth.chromium
+            browser = chrome.launch(headless=False)
+            page = browser.new_page()
+            page.route("**/*.{webp}", lambda route: route.abort())  # Block webp images
+            page.goto(data["base_url"])
 
-        # images folder
-        category_folder = "boots" if category == "football_boots" else "balls"
+            # Determine folder name for storing images
+            category_folder = "boots" if category == "football_boots" else "balls"
 
-        # open browser at catalog page
-        chrome = playwrigth.chromium
-        browser = chrome.launch(headless=False)
-        page = browser.new_page()
-        page.goto(data["base_url"])
+            # Accept cookies on the website
+            handle_cookies(page)
 
-        # handle cookies
-        handle_cookies(page)
+            # Scrape data from each product page
+            for link in links_lst:
+                size = len(links_lst)
 
-        for link in links_lst[:5]:
-            page.goto(link)
+                try:
+                    page.goto(link)
 
-            # render all content on the page
-            content = render_product_page(page)
+                    # Render product page content
+                    content = render_product_page(page)
 
-            # add data to products table
-            item = get_product_data(content, link, product_id, category_id)
-            products.append(item)
+                    # Collect product data and append to the products list
+                    item = get_product_data(content, link, product_id, category_id)
+                    products.append(item)
 
-            # add data to colors table
-            product_colors = get_product_colors(content, product_id)
-            if product_colors:
-                colors.extend(product_colors)
+                    # Collect color data and append to the colors list
+                    product_colors = get_product_colors(content, product_id)
+                    if product_colors:
+                        colors.extend(product_colors)
 
-            # add data to sizes table
-            product_sizes = get_product_sizes(content, product_id)
-            sizes.extend(product_sizes)
+                    # Collect size data and append to the sizes list
+                    product_sizes = get_product_sizes(content, product_id)
+                    sizes.extend(product_sizes)
 
-            # add data to category features
-            product_features = get_product_features(content, product_id)
-            if category == "football_boots":
-                boots_category.append(product_features)
-            else:
-                balls_category.append(product_features)
+                    # Collect category-specific features and append to the appropriate list
+                    product_features = get_product_features(content, product_id)
+                    if category == "football_boots":
+                        boots_category.append(product_features)
+                    else:
+                        balls_category.append(product_features)
 
-            # upload images of product
-            get_product_images(
-                content, link, product_id, images_folder, category_folder
-            )
+                    # Download and save product images
+                    get_product_images(
+                        content, link, product_id, images_folder, category_folder
+                    )
 
-            product_id += 1
+                    pct = round(counter / size * 100, 2)
+                    print(f"Product {counter} of {size}, {pct}% complete.")
+                    product_id += 1
+                    counter += 1
 
-        # add data to categories table
-        product_gategory = {"category_id": category_id, "category_name": category}
-        categories.append(product_gategory)
-        category_id += 1
+                except Exception as e:
+                    print(f"Error with product link: {link}")
+                    logging.error(traceback.format_exc())
 
-        browser.close()
+            # Add category data to the categories list
+            product_category = {"category_id": category_id, "category_name": category}
+            categories.append(product_category)
+            category_id += 1
+
+            print()
+            browser.close()
+
+        except Exception as e:
+            logging.error(traceback.format_exc())
 
 
 with sync_playwright() as pw:
     run(pw)
 
 
-# store data in csv files
-pd.DataFrame(products).to_csv(raw_data_folder / "products.csv", index=False)
-pd.DataFrame(colors).to_csv(raw_data_folder / "colors.csv", index=False)
-pd.DataFrame(sizes).to_csv(raw_data_folder / "sizes.csv", index=False)
-pd.DataFrame(categories).to_csv(raw_data_folder / "categories.csv", index=False)
-pd.DataFrame(boots_category).to_csv(raw_data_folder / "boots_category.csv", index=False)
-pd.DataFrame(balls_category).to_csv(raw_data_folder / "balls_category.csv", index=False)
+# Save scraped data to CSV files
+df_products, df_colors, df_sizes = (
+    pd.DataFrame(products),
+    pd.DataFrame(colors),
+    pd.DataFrame(sizes),
+)
+
+df_categories, boots_category, balls_category = (
+    pd.DataFrame(categories),
+    pd.DataFrame(boots_category),
+    pd.DataFrame(balls_category),
+)
+
+# Write data to CSV files with semicolon as the delimiter
+df_products.to_csv(raw_data_folder / "products.csv", index=False, sep=";")
+df_colors.to_csv(raw_data_folder / "colors.csv", index=False, sep=";")
+df_sizes.to_csv(raw_data_folder / "sizes.csv", index=False, sep=";")
+df_categories.to_csv(raw_data_folder / "categories.csv", index=False, sep=";")
+boots_category.to_csv(raw_data_folder / "boots_category.csv", index=False, sep=";")
+balls_category.to_csv(raw_data_folder / "balls_category.csv", index=False, sep=";")

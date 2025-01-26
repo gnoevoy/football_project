@@ -5,7 +5,7 @@ import requests
 
 
 # Path to the project folder for web scraping
-web_scraping_folder = Path.cwd() / "web-scraping"
+web_scraping_dir = Path.cwd() / "web-scraping"
 
 
 def handle_cookies(page):
@@ -14,7 +14,6 @@ def handle_cookies(page):
     cookie = page.locator("div.CybotCookiebotDialogActive")
     cookie.wait_for()
     page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")
-    expect(cookie).to_be_hidden()  # Ensure the pop-up is closed
 
 
 def get_total_items(page):
@@ -25,7 +24,6 @@ def get_total_items(page):
     total_items = soup.find(
         "p", class_="products-list-controls-container__paragraph amount"
     )
-    assert total_items is not None  # Ensure the element exists
     return int(total_items.text)
 
 
@@ -41,8 +39,6 @@ def get_product_links(page, page_num):
 
     # Collect links from the product cards
     links = [product.find("a")["href"] for product in products]
-
-    assert len(products) == len(links)  # Verify all products have links
     print(f"page: {page_num}  |  links: {len(links)}")
     return links
 

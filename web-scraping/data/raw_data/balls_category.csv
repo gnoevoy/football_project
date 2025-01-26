@@ -1,6 +1,33 @@
-product_id,Product Type:,Producer:,Ball size:,Ground type:,Class:,Collection:,Connecting Type:,Weigh:,League:,Color:,Manufacturer's Data:
-6,Balls,Select,5,Firm Ground (FG),Match,Select,Thermally welded,410-450g,1 Liga,White,"SELECT SPORT A/S, Fabriksparken 46, DK 2600 Glostrup, DK"
-7,Balls,adidas,5,Firm Ground (FG),Match,UCL 24/25,Thermally welded,410-450g,,Multicolor,"adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE"
-8,Balls,adidas,5,Firm Ground (FG),Match,Women's EURO 2025,Thermally welded,410-450g,,White,"adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE"
-9,Balls,adidas,5,Firm Ground (FG),Match,EURO 2024,Thermally welded,410-450g,,Silver,"adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE"
-10,Balls,Select,5,Firm Ground (FG),Match,Derbystar,Sewing,410-450g,Bundesliga,White,"SELECT SPORT A/S, Fabriksparken 46, DK 2600 Glostrup, DK"
+product_id;Product Type:;Producer:;Ball size:;Ground type:;Class:;Collection:;Connecting Type:;Weigh:;Color:;Manufacturer's Data:;League:;Team:
+452;Balls;Nike;5;Firm Ground (FG);Match;Other;Thermally welded;410-450g;Yellow;NIKE Retail B.V., PO BOX 6453, Colosseum 1, 1213 0, NL;;
+453;Balls;adidas;;Firm Ground (FG);Match;Ekstraklasa;;410-450g;White;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+454;Balls;Select;4;Indoor (IC/IN);Match;Select;Thermally welded;400-440g;White, Multicolor;SELECT SPORT A/S, Fabriksparken 46, DK 2600 Glostrup, DK;;
+455;Balls;adidas;5;Firm Ground (FG);Match;UCL 24/25;Thermally welded;410-450g;Multicolor;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+456;Balls;adidas;5;Firm Ground (FG);Match;Women's EURO 2025;Thermally welded;410-450g;White;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+457;Balls;adidas;5;Firm Ground (FG);Match;EURO 2024;Thermally welded;410-450g;Silver;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+458;Balls;Select;5;Firm Ground (FG);Match;Derbystar;Sewing;410-450g;White;SELECT SPORT A/S, Fabriksparken 46, DK 2600 Glostrup, DK;Bundesliga;
+459;Balls;Select;5;Firm Ground (FG);Match;Derbystar;Sewing;410-450g;White;SELECT SPORT A/S, Fabriksparken 46, DK 2600 Glostrup, DK;Bundesliga;
+460;Balls;Nike;5;Firm Ground (FG);Match;Team;Thermally welded;410-450g;White;NIKE Retail B.V., PO BOX 6453, Colosseum 1, 1213 0, NL;;
+461;Balls;Puma;5;Firm Ground (FG);Match;Orbita;Thermally welded;410-450g;White;Puma SE, Puma Way 1, 91074 Herzogenaurach, DE;;
+462;Balls;Puma;5;Firm Ground (FG);Match;Orbita;Thermally welded;410-450g;White;Puma SE, Puma Way 1, 91074 Herzogenaurach, DE;;
+463;Balls;Puma;5;Firm Ground (FG);Match;Orbita;Thermally welded;410-450g;Yellow;Puma SE, Puma Way 1, 91074 Herzogenaurach, DE;;
+464;Balls;adidas;5;Firm Ground (FG);Match;TIRO23;Edge-Glued;410-450g;White, Red;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+465;Balls;adidas;5;Firm Ground (FG);Match;TIRO23;Edge-Glued;410-450g;Orange;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+466;Balls;adidas;5;Firm Ground (FG);Match;MLS;Thermally welded;410-450g;White;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+467;Balls;adidas;5;Firm Ground (FG);Match;Conext;Thermally welded;410-450g;White;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+468;Balls;adidas;5;Beach;Match;Conext;Sewing;400-440g;Orange;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+469;Balls;adidas;5;Firm Ground (FG);Match;Licensed;Thermally welded;410-450g;White;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;Argentina
+470;Balls;adidas;5;Firm Ground (FG);Match;Licensed;Thermally welded;410-450g;White;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;Spain
+471;Balls;Nike;5;Firm Ground (FG);Match;Premier League;Thermally welded;410-450g;Yellow;NIKE Retail B.V., PO BOX 6453, Colosseum 1, 1213 0, NL;Premier League;
+472;Balls;Nike;5;Firm Ground (FG);Match;Premier League;Thermally welded;410-450g;White;NIKE Retail B.V., PO BOX 6453, Colosseum 1, 1213 0, NL;Premier League;
+473;Balls;Nike;5;Firm Ground (FG);Match;Premier League;Thermally welded;410-450g;White, Purple;NIKE Retail B.V., PO BOX 6453, Colosseum 1, 1213 0, NL;Premier League;
+474;Balls;Puma;5;Firm Ground (FG);Match;Serie A;Thermally welded;410-450g;White;Puma SE, Puma Way 1, 91074 Herzogenaurach, DE;Serie A;
+475;Balls;Puma;5;Firm Ground (FG);Match;Serie A;Thermally welded;410-450g;White;Puma SE, Puma Way 1, 91074 Herzogenaurach, DE;Serie A;
+476;Balls;Select;5;Firm Ground (FG);Match;Select;Thermally welded;410-450g;White;SELECT SPORT A/S, Fabriksparken 46, DK 2600 Glostrup, DK;1 Liga;
+477;Balls;Select;5;Firm Ground (FG);Match;Select;Thermally welded;410-450g;White;SELECT SPORT A/S, Fabriksparken 46, DK 2600 Glostrup, DK;;
+478;Balls;Select;Futsal;Indoor (IC/IN);Match;Select;Thermally welded;400-440g;White;SELECT SPORT A/S, Fabriksparken 46, DK 2600 Glostrup, DK;Ekstraklasa;
+479;Balls;adidas;5;Firm Ground (FG);Match;Other;Thermally welded;410-450g;Blue;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+480;Balls;adidas;5;Firm Ground (FG);Match;Other;Thermally welded;410-450g;White;adidas AG, Adi-Dassler-Strasse 1, 91074 Herzogenaurach, DE;;
+481;Balls;Nike;5;Firm Ground (FG);Match;Other;Thermally welded;410-450g;White;NIKE Retail B.V., PO BOX 6453, Colosseum 1, 1213 0, NL;;
+482;Balls;New Balance;5;Firm Ground (FG);Match;;Sewing;410-450g;White;New Balance Athletics, Inc., Brighton Landing, 100 Guest Street, Boston, MA 02135-2088, US;;
+483;Balls;New Balance;5;Firm Ground (FG);Match;;Sewing;410-450g;White;New Balance Athletics, Inc., Brighton Landing, 100 Guest Street, Boston, MA 02135-2088, US;;

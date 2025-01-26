@@ -1,11 +1,13 @@
-from playwright.sync_api import sync_playwright, Playwright
 from bs4 import BeautifulSoup
-from pathlib import Path
 import requests
-import re
 
 
 def render_product_page(page):
+    """
+    Render and return the main content of the product page.
+    Ensures all necessary sections (description, features) are fully loaded.
+    """
+
     main_content = page.locator("div.main-content-wrap")
     main_content.wait_for()
     page.locator("a[aria-controls='long-description-desktop']").click()
@@ -18,6 +20,11 @@ def render_product_page(page):
 
 
 def get_product_data(content, link, product_id, category_id):
+    """
+    Extract and return basic product information, including ID, name, price,
+    description, and link.
+    """
+
     scraped_id = link.split("-")[-1]
     title = content.find("h1", class_="product-card__title").text
     price = content.find(
@@ -36,10 +43,16 @@ def get_product_data(content, link, product_id, category_id):
         "description": description,
         "link": link,
     }
+
     return item
 
 
 def get_product_colors(content, product_id):
+    """
+    Extract and return all available colors for the product.
+    Each color includes the product ID and a unique color ID.
+    """
+
     colors = content.find(
         "ul",
         class_="model-group-products__wrap model-group-products__wrap--expandable",
@@ -53,14 +66,17 @@ def get_product_colors(content, product_id):
 
         return product_colors
 
+    return None
+
 
 def get_product_sizes(content, product_id):
-    all_size = content.find(
-        "ul",
-        class_="product-attributes mb-2",
-    )
+    """
+    Extract and return all available sizes for the product.
+    Each size includes the product ID, size number, and stock availability.
+    """
+
     product_sizes = []
-    for size in all_size.find_all(
+    for size in content.find_all(
         "li", class_="nav-item product-attributes__attribute-value"
     ):
         size_num = size.find("span").text
@@ -76,6 +92,11 @@ def get_product_sizes(content, product_id):
 
 
 def get_product_features(content, product_id):
+    """
+    Extract and return product features from the features table.
+    Each feature includes a title and value, mapped to the product ID.
+    """
+
     table = content.find(
         "table",
         class_="product-description-feature",
@@ -91,6 +112,11 @@ def get_product_features(content, product_id):
 
 
 def get_product_images(content, link, product_id, images_folder, category_folder):
+    """
+    Download and save all product images to the specified folder.
+    Images are named using the product ID and an incrementing number.
+    """
+
     images = content.find("div", class_="VueCarousel-inner")
     image_num = 1
 
