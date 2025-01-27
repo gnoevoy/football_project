@@ -1,11 +1,5 @@
 from playwright.sync_api import expect
 from bs4 import BeautifulSoup
-from pathlib import Path
-import requests
-
-
-# Path to the project folder for web scraping
-web_scraping_dir = Path.cwd() / "web-scraping"
 
 
 def handle_cookies(page):

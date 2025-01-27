@@ -1,10 +1,16 @@
 from playwright.sync_api import sync_playwright, Playwright
-from helper_functions.links_helpers import handle_cookies, web_scraping_dir
-from helper_functions.products_helpers import *
-import json
+from pathlib import Path
 import pandas as pd
+import json
+import sys
 import traceback
 import logging
+
+# access helper functions
+path = Path.cwd() / "web-scraping/"
+sys.path.append(str(path))
+from helper_functions.links_helpers import handle_cookies
+from helper_functions.products_helpers import *
 
 
 # Initialize lists to store data for CSV files
@@ -12,11 +18,11 @@ products, colors, sizes = [], [], []
 categories, boots_category, balls_category = [], [], []
 
 # Define paths for raw data and product images
-raw_data_folder = web_scraping_dir / "data" / "raw_data"
-images_folder = web_scraping_dir / "data" / "images"
+raw_data_folder = path / "data" / "raw_data"
+images_folder = path / "data" / "images"
 
 # Load scraped links from JSON file
-json_file_path = web_scraping_dir / "data" / "scraped_links.json"
+json_file_path = path / "data" / "scraped_links.json"
 with open(json_file_path, "r") as f:
     links = json.load(f)
 

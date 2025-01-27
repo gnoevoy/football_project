@@ -1,5 +1,6 @@
-from playwright.sync_api import sync_playwright, expect, Playwright
-from helper_functions.links_helpers import *
 from pathlib import Path
 
-print(0 is None)
+lst = [1, 2, 3, 4]
+
+for i, x in enumerate(lst[1:]):
+    print(i)

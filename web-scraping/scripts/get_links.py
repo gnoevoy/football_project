@@ -1,9 +1,15 @@
 from playwright.sync_api import sync_playwright, Playwright
-from helper_functions.links_helpers import *
+from pathlib import Path
 import requests
+import sys
 import json
 import traceback
 import logging
+
+# access helper functions
+path = Path.cwd() / "web-scraping/"
+sys.path.append(str(path))
+from helper_functions.links_helpers import *
 
 
 # Dictionary to store scraped links for each category
@@ -67,7 +73,7 @@ with sync_playwright() as pw:
     run(pw)
 
 # Save scraped links to a JSON file
-path_to_file = web_scraping_dir / "data" / "scraped_links.json"
+path_to_file = path / "data" / "scraped_links.json"
 
 with open(path_to_file, "w") as f:
     json.dump(scraped_links, f, indent=4)
