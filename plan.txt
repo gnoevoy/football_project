@@ -1,10 +1,13 @@
 TASKS AT HAND:
 
-1. Pass django course -> learn concepts
-2. Connect google cloud db 
-3. Run application in Docker (refresher)
-4. Implement css framework for UI
+create a structure for website (nav)
+connect db, media files and display them in web site
+mess with ui appearance
 
+- navigatoin in my project (nav bar for all apps)
+- how to connect cloud db, how will it look, add data there
+- how to place images from cloud storage
+- UI framework (which one + implementatio)
 
 
 

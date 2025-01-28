@@ -1,3 +1,23 @@
-<h3>Hello bars1k</h3>
+<h3>simple form</h3>
 
-{{ weapon }}
+<form action="{% url 'output' %}">
+    {{ form.as_p }}
+
+    {% comment %} selection {% endcomment %}
+
+    <select name="len">
+        {% for item in length %}
+        {% if item == 8 %}
+        <option value="{{ item }}" selected="selected">{{ item }} - default</option>
+        {% else %}
+        <option value="{{ item }}">{{ item }}</option>
+        {% endif %}
+        {% endfor %}
+    </select>
+
+    <input type="checkbox" name="uppercase"> Uppercase
+    <input type="checkbox" name="symbols"> Symbols
+    <input type="checkbox" name="numbers"> Numbers
+
+    <input type="submit" value="submit">
+</form>
