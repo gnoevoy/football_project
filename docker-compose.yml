@@ -1,0 +1,16 @@
+services:
+  website:
+    container_name: django-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./website-project:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+
+volumes:
+  django-app-data:

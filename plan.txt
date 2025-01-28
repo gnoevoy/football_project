@@ -1,7 +1,5 @@
 TASKS AT HAND:
 
-101: git new branch
-
 1. Pass django course -> learn concepts
 2. Connect google cloud db 
 3. Run application in Docker (refresher)
