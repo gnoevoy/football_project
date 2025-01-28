@@ -19,7 +19,7 @@ categories, boots_category, balls_category = [], [], []
 
 # Define paths for raw data and product images
 raw_data_folder = path / "data" / "raw_data"
-images_folder = path / "data" / "images"
+images_folder = path / "data" / "product_images"
 
 # Load scraped links from JSON file
 json_file_path = path / "data" / "scraped_links.json"
