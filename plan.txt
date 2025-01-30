@@ -1,15 +1,6 @@
 TASKS AT HAND:
 
-create a structure for website (nav)
-connect db, media files and display them in web site
-mess with ui appearance
-
-- navigatoin in my project (nav bar for all apps)
-- how to connect cloud db, how will it look, add data there
-- how to place images from cloud storage
-- UI framework (which one + implementatio)
-
-
+* running only db and UI pannel for db only -> good solution
 
 
 
