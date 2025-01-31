@@ -24,7 +24,7 @@ class Product(models.Model):
         max_digits=5, decimal_places=2, null=True, blank=True
     )
     description = models.TextField(blank=True, null=True)
-    scraped_id = models.IntegerField(unique=True)
+    scraped_num = models.IntegerField(unique=True)
     scraped_link = models.URLField(unique=True)
     created_at = models.DateTimeField(default=now)
 

@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright, Playwright
 from pathlib import Path
+from datetime import datetime
 import pandas as pd
 import json
 import sys
@@ -14,7 +15,7 @@ from helper_functions.products_helpers import *
 
 
 # Initialize lists to store data for CSV files
-products, colors, sizes = [], [], []
+products, colors, sizes, labels = [], [], [], []
 categories, boots_category, balls_category = [], [], []
 
 # Define paths for raw data and product images
@@ -68,6 +69,11 @@ def run(playwrigth=Playwright):
                     if product_colors:
                         colors.extend(product_colors)
 
+                    # Collect labels data and append it to lables list
+                    product_labels = get_product_labels(content, product_id)
+                    if product_labels:
+                        labels.extend(product_labels)
+
                     # Collect size data and append to the sizes list
                     product_sizes = get_product_sizes(content, product_id)
                     sizes.extend(product_sizes)
@@ -94,7 +100,11 @@ def run(playwrigth=Playwright):
                     logging.error(traceback.format_exc())
 
             # Add category data to the categories list
-            product_category = {"category_id": category_id, "category_name": category}
+            product_category = {
+                "category_id": category_id,
+                "category_name": category,
+                "created_at": datetime.today().strftime("%Y-%m-%d"),
+            }
             categories.append(product_category)
             category_id += 1
 
@@ -110,10 +120,11 @@ with sync_playwright() as pw:
 
 
 # Save scraped data to CSV files
-df_products, df_colors, df_sizes = (
+df_products, df_colors, df_sizes, df_labels = (
     pd.DataFrame(products),
     pd.DataFrame(colors),
     pd.DataFrame(sizes),
+    pd.DataFrame(labels),
 )
 
 df_categories, boots_category, balls_category = (
@@ -126,6 +137,7 @@ df_categories, boots_category, balls_category = (
 df_products.to_csv(raw_data_folder / "products.csv", index=False, sep=";")
 df_colors.to_csv(raw_data_folder / "colors.csv", index=False, sep=";")
 df_sizes.to_csv(raw_data_folder / "sizes.csv", index=False, sep=";")
+df_labels.to_csv(raw_data_folder / "labels.csv", index=False, sep=";")
 df_categories.to_csv(raw_data_folder / "categories.csv", index=False, sep=";")
 boots_category.to_csv(raw_data_folder / "boots_category.csv", index=False, sep=";")
 balls_category.to_csv(raw_data_folder / "balls_category.csv", index=False, sep=";")

@@ -6,4 +6,14 @@ TASKS AT HAND:
 
 
 
+data: scrape - clean - load to db (alregy existed db)
+images: scrape - load to storage + get links
+
+
+
+* skill writing data to database 
+* skill - working with cloud storage
+* how to hide sensative data (db connections)
+
+
 

@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+from datetime import datetime
 
 
 def render_product_page(page):
@@ -25,23 +26,29 @@ def get_product_data(content, link, product_id, category_id):
     description, and link.
     """
 
-    scraped_id = link.split("-")[-1]
     title = content.find("h1", class_="product-card__title").text
     price = content.find(
         "span",
         class_="text-nowrap price-wrapper price currency product-card__current-price",
     ).text
+    before_discount = content.find(
+        "span",
+        class_="text-nowrap price-wrapper price currency product-card__old-price",
+    )
+    scraped_num = link.split("-")[-1]
     description = (
         content.find("div", class_="product-params-content").find("span").contents
     )
     item = {
-        "id": product_id,
-        "scaped_id": scraped_id,
+        "product_id": product_id,
         "category_id": category_id,
         "name": title,
         "price": price,
+        "before_discount": before_discount.text if before_discount else None,
         "description": description,
-        "link": link,
+        "scraped_num": scraped_num,
+        "scraped_link": link,
+        "created_at": datetime.today().strftime("%Y-%m-%d"),
     }
 
     return item
@@ -60,11 +67,24 @@ def get_product_colors(content, product_id):
     if colors:
         product_colors = []
         for color in colors.find_all("a", class_="model-group-products__link"):
-            color_id = color["href"].split("-")[-1]
-            product_color = {"product_id": product_id, "color_id": color_id}
+            color_name = color["href"].split("-")[-1]
+            product_color = {"product_id": product_id, "color_name": color_name}
             product_colors.append(product_color)
 
         return product_colors
+
+    return None
+
+
+def get_product_labels(content, product_id):
+    labels = content.find("div", class_="product-card__badges")
+    if labels:
+        product_labels = []
+        for label in labels.find_all("span"):
+            product_label = {"product_id": product_id, "label_name": label.text}
+            product_labels.append(product_label)
+
+        return product_labels
 
     return None
 
