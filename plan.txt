@@ -1,17 +1,8 @@
 TASKS AT HAND:
 
-* running only db and UI pannel for db only -> good solution
-
-
-
-
-
-
-
-
-
-
-
+1. Update scraping script - sql table columns + images table (product, img, main)
+2. Create a script to upload data to db
+3. display data in admin panel + in html page 
 
 
 
