@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h3>catalog page</h3>
+
+
+{% for product in products %}
+    <p> {{product.name}} </p>
+    <p> {{product.price}} </p>
+    <p> {{product.discount}} </p>
+    <br>
+{% endfor %}
+
+{% endblock content %}

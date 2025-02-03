@@ -1,0 +1,6 @@
+e-commerce -> main app 
+localhost/balls or boots/ product name in slug + id of produt
+
+
+# how to structure navigation (search, wish lits, basket, account, )
+-> based on section change icons but keep links , logo and user account

@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
+from django.utils.text import slugify
+
 
 # Create your models here.
 
@@ -8,6 +10,9 @@ class Categories(models.Model):
     category_id = models.AutoField(primary_key=True)
     category_name = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return self.category_name
 
 
 class Product(models.Model):
@@ -27,6 +32,15 @@ class Product(models.Model):
     scraped_num = models.IntegerField(unique=True)
     scraped_link = models.URLField(unique=True)
     created_at = models.DateTimeField(default=now)
+    slug = models.SlugField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    # def save(self, *args, **kwargs):
+    #     if not self.slug:
+    #         self.slug = slugify(self.name)
+    #     super().save(*args, **kwargs)
 
 
 class Colors(models.Model):
@@ -34,6 +48,9 @@ class Colors(models.Model):
         Product, on_delete=models.CASCADE, related_name="colors", db_column="product_id"
     )
     color_name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.product_id
 
 
 class Sizes(models.Model):
@@ -43,12 +60,18 @@ class Sizes(models.Model):
     size_num = models.CharField(max_length=20)
     in_stock = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.product_id
+
 
 class Labels(models.Model):
     product_id = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="labels", db_column="product_id"
     )
     label_name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.product_id
 
 
 class Product_Images(models.Model):
@@ -57,6 +80,9 @@ class Product_Images(models.Model):
     )
     image_name = models.CharField(max_length=255)
     is_thumbnail = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.product_id
 
 
 class Balls_Features(models.Model):
@@ -77,6 +103,9 @@ class Balls_Features(models.Model):
     manufacturers_data = models.CharField(max_length=100, null=True, blank=True)
     league = models.CharField(max_length=100, null=True, blank=True)
     team = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return self.product_id
 
 
 class Boots_Features(models.Model):
@@ -99,3 +128,6 @@ class Boots_Features(models.Model):
     plays_in_these_boots = models.CharField(max_length=100, null=True, blank=True)
     manufacturers_data = models.CharField(max_length=100, null=True, blank=True)
     team = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return self.product_id

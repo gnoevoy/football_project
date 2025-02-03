@@ -1,25 +1,19 @@
-<h3>simple form</h3>
+{% extends "main.html" %}
 
-<form action="{% url 'output' %}">
-    {{ form.as_p }}
+{% block content %}
 
-    {% comment %} selection {% endcomment %}
+<h3>categories</h3>
+{% for category in categories %}
+    <a href=" {% url "catalog" category.category_name %} "> {{ category.category_name }} | </a>
+{% endfor %}
 
-    <select name="len">
-        {% for item in length %}
-        {% if item == 8 %}
-        <option value="{{ item }}" selected="selected">{{ item }} - default</option>
-        {% else %}
-        <option value="{{ item }}">{{ item }}</option>
-        {% endif %}
-        {% endfor %}
-    </select>
+<h3>new products</h3>
+{% for product in new_products %}
+    <p> {{product.name}} </p>
+    <p> {{product.price}} </p>
+    <p> {{product.discount}} </p>
 
-    <input type="checkbox" name="uppercase"> Uppercase
-    <input type="checkbox" name="symbols"> Symbols
-    <input type="checkbox" name="numbers"> Numbers
+{% endfor %}
 
-    <input type="submit" value="submit">
-</form>
 
-<h3>hellO LOX</h3>
+{% endblock content %}
