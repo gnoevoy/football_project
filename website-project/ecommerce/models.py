@@ -25,22 +25,36 @@ class Product(models.Model):
     )
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount = models.DecimalField(
-        max_digits=5, decimal_places=2, null=True, blank=True
+    price_before_discount = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    sale_pct = models.DecimalField(
+        max_digits=5, decimal_places=0, null=True, blank=True
     )
     description = models.TextField(blank=True, null=True)
-    scraped_num = models.IntegerField(unique=True)
-    scraped_link = models.URLField(unique=True)
+    scraped_num = models.IntegerField(unique=True, null=True, blank=True)
+    scraped_link = models.URLField(null=True, blank=True)
     created_at = models.DateTimeField(default=now)
     slug = models.SlugField(null=True, blank=True)
+    img_path = models.CharField(
+        max_length=500,
+        blank=True,
+    )
+
+    def save(self, *args, **kwargs):
+        if self.price_before_discount:
+            self.sale_pct = (
+                (self.price_before_discount - self.price)
+                / self.price_before_discount
+                * 100
+            )
+
+        self.slug = slugify(self.name)
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
-
-    # def save(self, *args, **kwargs):
-    #     if not self.slug:
-    #         self.slug = slugify(self.name)
-    #     super().save(*args, **kwargs)
 
 
 class Colors(models.Model):
@@ -50,39 +64,39 @@ class Colors(models.Model):
     color_name = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.product_id
+        return str(self.product_id)
 
 
 class Sizes(models.Model):
     product_id = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="sizes", db_column="product_id"
     )
-    size_num = models.CharField(max_length=20)
+    size = models.CharField(max_length=20)
     in_stock = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.product_id
+        return str(self.product_id)
 
 
 class Labels(models.Model):
     product_id = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="labels", db_column="product_id"
     )
-    label_name = models.CharField(max_length=100)
+    label = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.product_id
+        return str(self.product_id)
 
 
 class Product_Images(models.Model):
     product_id = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="images", db_column="product_id"
     )
-    image_name = models.CharField(max_length=255)
+    img_path = models.CharField(max_length=255)
     is_thumbnail = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.product_id
+        return str(self.product_id)
 
 
 class Balls_Features(models.Model):
@@ -105,7 +119,7 @@ class Balls_Features(models.Model):
     team = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return self.product_id
+        return str(self.product_id)
 
 
 class Boots_Features(models.Model):
@@ -130,4 +144,4 @@ class Boots_Features(models.Model):
     team = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return self.product_id
+        return str(self.product_id)

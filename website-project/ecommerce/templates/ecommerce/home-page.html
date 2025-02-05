@@ -8,12 +8,8 @@
 {% endfor %}
 
 <h3>new products</h3>
-{% for product in new_products %}
-    <p> {{product.name}} </p>
-    <p> {{product.price}} </p>
-    <p> {{product.discount}} </p>
-
+{% for product in new_products  %}
+    {% include "ecommerce/product-card.html" with product=product img_prefix=img_prefix %}
 {% endfor %}
-
 
 {% endblock content %}

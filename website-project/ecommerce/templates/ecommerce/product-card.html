@@ -1,0 +1,25 @@
+
+<div>
+    <a href="{% url "product-page" product.category_id.category_name product.slug product.product_id %}">
+        <img src="{{ img_prefix }}{{ product.img_path }}" alt="{{ product.name }}" width="40" height="60">
+    </a>
+
+   <ul>
+        {% if product.price_before_discount %}
+            <li> Sale -{{product.sale_pct}}%</li>
+        {% endif %}
+
+        {% for label in product.labels.all %}
+            <li> {{label.label}} </li>
+        {% endfor %}
+   </ul> 
+
+    <p> {{product.name}} </p>
+    <p> {{product.price}} </p>
+
+    {% if product.price_before_discount %}
+        <p>{{ product.price_before_discount }}</p>
+    {% endif %}
+
+    <br>
+</div>

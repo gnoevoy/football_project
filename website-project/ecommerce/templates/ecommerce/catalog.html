@@ -3,12 +3,10 @@
 {% block content %}
 <h3>catalog page</h3>
 
-
 {% for product in products %}
-    <p> {{product.name}} </p>
-    <p> {{product.price}} </p>
-    <p> {{product.discount}} </p>
-    <br>
+    {% include "ecommerce/product-card.html" with product=product img_prefix=img_prefix %}
+
 {% endfor %}
+
 
 {% endblock content %}
