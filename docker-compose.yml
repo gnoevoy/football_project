@@ -1,43 +1,28 @@
 services:
-  # website:
-  #   container_name: django-app
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./website-project:/app
-  #   ports:
-  #     - 8000:8000
-  #   environment:
-  #     - PYTHONUNBUFFERED=1
-  #     - PYTHONDONTWRITEBYTECODE=1
-  #   depends_on:
-  #     - db
-
-  db:
+  postgres-db:
     image: postgres:16
     container_name: postgres-db
     restart: always
     ports:
       - 5432:5432
-    environment:
-      POSTGRES_DB: football-project
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+    env_file:
+      - .credentials
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U admin" ]
       interval: 10s
       timeout: 5s
       retries: 5
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - postgres-db:/var/lib/postgresql/data
   adminer:
     image: adminer
+    container_name: adminer-postgres
     restart: always
     ports:
       - 8080:8080
 
 volumes:
-  db-data:
+  postgres-db:
+  redis-db:
 
 

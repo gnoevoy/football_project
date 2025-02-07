@@ -13,29 +13,7 @@ labels_df = pd.read_csv(data_dir / "labels.csv", delimiter=";")
 categories_df = pd.read_csv(data_dir / "categories.csv", delimiter=";")
 boots_category_df = pd.read_csv(data_dir / "boots_category.csv", delimiter=";")
 balls_category_df = pd.read_csv(data_dir / "balls_category.csv", delimiter=";")
-
-# Create images table by getting scraped images names
-img_dir = web_scraping_dir / "data" / "product_images"
-paths = img_dir.rglob("*")
-dir_name = "product_images"
-images = []
-
-for path in paths:
-    if dir_name in path.parts and path.is_file():
-        prefix, img = str(path).split("/")[-2:]
-        product_id = int(img.split("-")[0])
-        image_name = f"{prefix}/{img}"
-        is_thumbnail = True if int(img.split("-")[1][0]) == 1 else False
-
-        row = {
-            "product_id": product_id,
-            "image_name": image_name,
-            "is_thumbnail": is_thumbnail,
-        }
-        images.append(row)
-
-images_df = pd.DataFrame(images)
-
+images_df = pd.read_csv(data_dir / "images.csv", delimiter=";")
 
 # connect to database
 DB_NAME = "football-project"
@@ -45,10 +23,10 @@ HOST = "localhost"
 PORT = "5432"
 engine = create_engine(f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}")
 
-# list all tables in db
-inspector = inspect(engine)
-tables = [table for table in inspector.get_table_names() if "ecommerce" in table]
-print(tables)
+# # list all tables in db
+# inspector = inspect(engine)
+# tables = [table for table in inspector.get_table_names() if "ecommerce" in table]
+# print(tables)
 
 
 # load data to db

@@ -1,2 +1,51 @@
-<h3>logo , links , icons</h3>
-<br>
+<nav class="navbar navbar-expand-lg bg-light shadow-sm fixed-top border-bottom">
+    <div class="container-xl" style="max-width: 1420px;" >
+        
+        <!-- Logo -->
+        <a class="navbar-brand me-4" href="{% url 'home' %}">
+            <img src="https://storage.cloud.google.com/football_project/ecommerce/website-images/logo.svg" alt="Logo" width="40">
+        </a>
+
+        <!-- Mobile Navbar Toggle -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar Content -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto"> 
+                <li class="nav-item">
+                    <a class="nav-link active text-dark" href="{% url 'home' %}">HOME</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active text-dark" href="/boots/">BOOTS</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active text-dark" href="/balls/">BALLS</a>
+                </li>
+            </ul>
+
+            <!-- Right Section: Basket + Button -->
+            <div class="d-flex align-items-center gap-4">
+                <!-- Shopping Basket -->
+                <a href="#" class="d-flex align-items-center text-dark text-decoration-none basket-container">
+                    <span class="material-symbols-outlined basket-icon">shopping_basket</span>
+                    <span class="ms-2">Basket (0)</span>
+                </a>
+
+                <!-- Place Order Button -->
+                <button class="btn btn-primary">Place an Order</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Add Spacing for Sticky Navbar (prevents content overlap) -->
+<div style="height: 80px;"></div>
+
+
+
+
+
+

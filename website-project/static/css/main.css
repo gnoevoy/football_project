@@ -1,0 +1,18 @@
+/* Container Max Width (Matches Navbar & Footer) */
+.container-xl {
+    max-width: 1420px !important;
+}
+
+/* Keep Navbar & Footer Shadow Consistent */
+.navbar {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.footer {
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Enable Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}

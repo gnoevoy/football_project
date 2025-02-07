@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.db.models import OuterRef, Subquery
+from django.db.models import Count
 from .models import (
     Categories,
     Product,
@@ -19,21 +19,32 @@ product_images_prefix = (
 
 
 def home(request):
-    categories = Categories.objects.all()
-    new_products = Product.objects.filter(labels__label="new").select_related(
-        "category_id"
+    # categories
+    categories_lst = list(
+        Categories.objects.annotate(products_count=Count("products"))
+        .order_by("category_id")
+        .values("category_name", "products_count")
+    )
+    preview_img = [
+        "https://storage.cloud.google.com/football_project/ecommerce/website-images/balls-preview.jpg",
+        "https://storage.cloud.google.com/football_project/ecommerce/website-images/boots-preview.jpg",
+    ]
+    for i, category in enumerate(categories_lst):
+        category["preview_img"] = preview_img[i]
+
+    # new products (at the moment all products)
+    new_products = (
+        Product.objects.all().select_related("category_id").prefetch_related("labels")
     )
 
     context = {
-        "categories": categories,
+        "categories": categories_lst,
         "new_products": new_products,
-        "img_prefix": product_images_prefix,
     }
     return render(request, "ecommerce/home-page.html", context)
 
 
 def catalog(request, category):
-    # category = Categories.objects.get(category_name=category)
     products = Product.objects.filter(category_id__category_name=category)
 
     context = {

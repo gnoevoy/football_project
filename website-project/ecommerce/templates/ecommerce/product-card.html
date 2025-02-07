@@ -1,25 +1,24 @@
+{% load static %}
 
-<div>
-    <a href="{% url "product-page" product.category_id.category_name product.slug product.product_id %}">
-        <img src="{{ img_prefix }}{{ product.img_path }}" alt="{{ product.name }}" width="40" height="60">
+<div class="card product-card position-relative">
+    <!-- Labels (Top-Left Corner) -->
+    {% for label in product.labels.all %}
+        <span class="badge text-bg-primary position-absolute top-0 start-0 m-2">{{ label.label }}</span>
+    {% endfor %}
+
+    <!-- Product Image -->
+    <a href="{% url 'product-page' product.category_id.category_name product.slug product.product_id %}">
+        <img class="card-img-top" src="https://storage.cloud.google.com/football_project/ecommerce/product-images/{{ product.img_path }}" 
+             alt="{{ product.name }}">
     </a>
 
-   <ul>
+    <!-- Product Details -->
+    <div class="card-footer text-center">
+        <h5 class="product-title">{{ product.name }}</h5>
+        <p class="product-price fw-bold">{{ product.price }}</p>
+
         {% if product.price_before_discount %}
-            <li> Sale -{{product.sale_pct}}%</li>
+            <p class="old-price text-danger"><s>{{ product.price_before_discount }}</s> -{{ product.sale_pct }}%</p>
         {% endif %}
-
-        {% for label in product.labels.all %}
-            <li> {{label.label}} </li>
-        {% endfor %}
-   </ul> 
-
-    <p> {{product.name}} </p>
-    <p> {{product.price}} </p>
-
-    {% if product.price_before_discount %}
-        <p>{{ product.price_before_discount }}</p>
-    {% endif %}
-
-    <br>
+    </div>
 </div>

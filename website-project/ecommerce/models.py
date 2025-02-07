@@ -35,7 +35,7 @@ class Product(models.Model):
     scraped_num = models.IntegerField(unique=True, null=True, blank=True)
     scraped_link = models.URLField(null=True, blank=True)
     created_at = models.DateTimeField(default=now)
-    slug = models.SlugField(null=True, blank=True)
+    slug = models.SlugField(max_length=1000, null=True, blank=True)
     img_path = models.CharField(
         max_length=500,
         blank=True,

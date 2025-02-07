@@ -1,7 +1,20 @@
-TASKS AT HAND:
+Football products
+Aim: build to ETL pipelines
 
-1. Spend some time to learn how to interact with db and how they work
-2. Learn try expect errors handling
-3. Learn Airflow and how utilaze it in data pipelines
+=============================================
 
-4. Backend
+1. Fetch data to db, storage
+    - scrape
+    - transform
+    - load to storage place
+2. make it periodcly + get result in db table and log files
+3. write fake data enties periodcly
+
+(db structured, non structured, storage, airflow, docker, cloud resources to run scripts)
+* cool to display everythong in site (see db and can filter it)
+
+=============================================
+
+- build an api based on db
+- move, transform , save data
+- create dashborad
