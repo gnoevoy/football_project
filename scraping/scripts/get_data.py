@@ -11,7 +11,8 @@ base_path = Path.cwd() / "scraping"
 sys.path.append(str(base_path))
 
 # Import helper functions
-from functions.get_links_helpers import *
+from functions.get_links_helpers import handle_cookies
+from functions.get_data_helpers import *
 from functions.db_helpers import get_max_product_id
 from functions.logs import logs_setup
 
@@ -41,6 +42,8 @@ def run(playwrigth=Playwright):
 
     for category, data in links.items():
         urls_lst = data["urls"]
+        scraped_products_num = 0
+        category_id = 1 if category == "boots" else 2
 
         try:
             # Launch browser with image blocking
@@ -53,18 +56,58 @@ def run(playwrigth=Playwright):
             # Determine folder name for storing images
             category_folder = "boots" if category == "boots" else "balls"
 
-            for url in urls_lst:
-                pass
+            for url in urls_lst[:5]:
+                try:
+                    # Render product page content
+                    page.goto(url)
+                    content = render_product_page(page)
 
-            logging_msg.info("good")
+                    # Collect product data and append to the products list
+                    product = get_product_data(content, url, product_id, category_id)
+                    products.append(product)
+
+                    # Collect color data and append to the colors list
+                    product_colors = get_product_colors(content, product_id)
+                    if product_colors:
+                        colors.extend(product_colors)
+
+                    # Collect labels data and append it to lables list
+                    product_labels = get_product_labels(content, product_id)
+                    if product_labels:
+                        labels.extend(product_labels)
+
+                    # Collect size data and append to the sizes list
+                    product_sizes = get_product_sizes(content, product_id)
+                    if product_sizes:
+                        sizes.extend(product_sizes)
+
+                    product_id += 1
+                    scraped_products_num += 1
+
+                except Exception as e:
+                    traceback.print_exc()
+                    logging_msg.error(f"Skipping product: {url}", exc_info=True)
+
+            print(colors)
+            print(labels)
+            print(sizes)
+
+            # Log category summary
+            category_message = {
+                "scraped_products": scraped_products_num,
+                "total_links": len(urls_lst),
+            }
+            print(category_message)
+            logging_msg.info(category_message)
 
         except Exception as e:
             traceback.print_exc()
             logging_msg.error("An error occurred:", exc_info=True)
 
+        browser.close()
+
 
 with sync_playwright() as pw:
     run(pw)
-
 
 # Write scraped data to CSV files
