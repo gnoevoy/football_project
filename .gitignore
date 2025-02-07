@@ -1,4 +1,4 @@
 env
 .credentials
 __pycache__/
-web-scraping/data/
+*/data/

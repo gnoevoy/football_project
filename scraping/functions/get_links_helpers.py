@@ -10,8 +10,6 @@ def handle_cookies(page):
 
 
 def get_total_items(page):
-    """Retrieve the total number of items from the catalog."""
-
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
     total_items = soup.find(
@@ -20,20 +18,18 @@ def get_total_items(page):
     return int(total_items.text)
 
 
-def get_product_links(page, page_num):
-    """Extract product links from the current catalog page."""
-
+def get_product_links(page, db_data):
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
+    products = soup.select("div.category-grid__item:not(.last-brick)")
 
-    # Get product cards, excluding the "load more" button
-    grid = soup.find("div", class_="category-grid category-grid--small-items")
-    products = grid.select("div.category-grid__item:not(.last-brick)")
-
-    # Collect links from the product cards
-    links = [product.find("a")["href"] for product in products]
-    print(f"page: {page_num}  |  links: {len(links)}")
-    return links
+    urls = []
+    for product in products:
+        url = product.find("a")["href"]
+        id = int(url.split("-")[-1])
+        if id not in db_data:
+            urls.append(url)
+    return urls
 
 
 if __name__ == "__main__":
