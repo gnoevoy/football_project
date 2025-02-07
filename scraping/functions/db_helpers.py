@@ -29,3 +29,11 @@ def get_scraped_ids():
         [int(row[0]) for row in balls_ids]
     )
     return boots, balls
+
+
+def get_max_product_id():
+    with engine.connect() as conn:
+        max_product_id = conn.execute(
+            text("SELECT COALESCE(MAX(product_id), 0) FROM products")
+        ).scalar()
+    return max_product_id
