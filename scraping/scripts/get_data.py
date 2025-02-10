@@ -1,10 +1,7 @@
 from playwright.sync_api import sync_playwright, Playwright
 from pathlib import Path
-import requests
-from datetime import date
 import sys
 import json
-import traceback
 
 # Set base path for helper functions
 base_path = Path.cwd() / "scraping"
@@ -17,7 +14,7 @@ from functions.db_helpers import get_max_product_id
 from functions.logs import logs_setup
 
 # Setup logging
-logging_msg = logs_setup("get_data.log")
+logger = logs_setup("get_data.log")
 
 # Define paths
 data_dir = base_path / "data"
@@ -31,13 +28,12 @@ with open(json_file_path, "r") as f:
 
 # Initialize lists to store data for CSV files
 products, colors, sizes, labels = [], [], [], []
-product_features = {}
+product_features = {"product_id": "features_dct"}
 
 
 def run(playwrigth=Playwright):
-    logging_msg.info("==========    Scraping started   ==========")
-
-    max_product_id = get_max_product_id()
+    logger.info("SCRAPING STARTED")
+    max_product_id = get_max_product_id()  # Get the highest product_id from db
     product_id = max_product_id + 1
 
     for category, data in links.items():
@@ -55,54 +51,71 @@ def run(playwrigth=Playwright):
 
             # Determine folder name for storing images
             category_folder = "boots" if category == "boots" else "balls"
+            logger.info("----------")
+            logger.info(f"{category.upper()}")
 
-            for url in urls_lst[:5]:
+            for url in urls_lst:
                 try:
                     # Render product page content
                     page.goto(url)
                     content = render_product_page(page)
 
-                    # Collect product data and append to the products list
+                    # Scrape main product data (if this fails -> skip such a product)
                     product = get_product_data(content, url, product_id, category_id)
                     products.append(product)
 
                     # Collect color data and append to the colors list
-                    product_colors = get_product_colors(content, product_id)
-                    if product_colors:
-                        colors.extend(product_colors)
+                    product_colors, flag_colors = get_product_colors(
+                        content, product_id, url, logger
+                    )
+                    colors.extend(product_colors)
 
                     # Collect labels data and append it to lables list
-                    product_labels = get_product_labels(content, product_id)
-                    if product_labels:
-                        labels.extend(product_labels)
+                    product_labels, flag_labels = get_product_labels(
+                        content, product_id, url, logger
+                    )
+                    labels.extend(product_labels)
 
                     # Collect size data and append to the sizes list
-                    product_sizes = get_product_sizes(content, product_id)
-                    if product_sizes:
-                        sizes.extend(product_sizes)
+                    product_sizes, flag_sizes = get_product_sizes(
+                        content, product_id, url, logger
+                    )
+                    sizes.extend(product_sizes)
+
+                    # Collect product specific features
+                    features, flag_features = get_product_features(
+                        content, product_id, url, logger
+                    )
+                    if features:
+                        product_features[product_id] = features
+
+                    # Download and save product images
+                    flag_images = get_product_images(
+                        content, product_id, img_dir, category_folder, url, logger
+                    )
+
+                    # Check if all data were scraped successfully
+                    success = [
+                        flag_colors,
+                        flag_labels,
+                        flag_sizes,
+                        flag_features,
+                        flag_images,
+                    ]
+                    if all(success):
+                        logger.info(f"Product {product_id} scraped successfully")
 
                     product_id += 1
                     scraped_products_num += 1
 
-                except Exception as e:
-                    traceback.print_exc()
-                    logging_msg.error(f"Skipping product: {url}", exc_info=True)
+                except Exception:
+                    logger.error(f"Product was skipped, {url}", exc_info=True)
 
-            print(colors)
-            print(labels)
-            print(sizes)
+            # Category summary
+            logger.info(f"Scraped: {scraped_products_num} | Total: {len(urls_lst)}")
 
-            # Log category summary
-            category_message = {
-                "scraped_products": scraped_products_num,
-                "total_links": len(urls_lst),
-            }
-            print(category_message)
-            logging_msg.info(category_message)
-
-        except Exception as e:
-            traceback.print_exc()
-            logging_msg.error("An error occurred:", exc_info=True)
+        except Exception:
+            logger.error("Unexpected error", exc_info=True)
 
         browser.close()
 
@@ -110,4 +123,21 @@ def run(playwrigth=Playwright):
 with sync_playwright() as pw:
     run(pw)
 
-# Write scraped data to CSV files
+
+# Write scraped data to CSV / JSON files
+logger.info("----------")
+logger.info("OUTPUT")
+try:
+    import_to_csv(products, raw_data_path, "products.csv")
+    import_to_csv(labels, raw_data_path, "labels.csv")
+    import_to_csv(colors, raw_data_path, "colors.csv")
+    import_to_csv(sizes, raw_data_path, "sizes.csv")
+
+    with open(raw_data_path / "product_features.json", "w") as f:
+        json.dump(product_features, f, indent=4)
+
+    logger.info("Files were successfully written")
+
+except Exception:
+    logger.error(f"Unexpected error", exc_info=True)
+logger.info("----------")

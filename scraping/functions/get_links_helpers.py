@@ -19,10 +19,10 @@ def get_total_items(page):
     total_items = soup.find(
         "p", class_="products-list-controls-container__paragraph amount"
     )
-    return int(total_items.text)
+    return int(total_items.text) if total_items else None
 
 
-def get_product_links(page, db_data):
+def get_product_links(page, db_data, logger):
     """Scrapes product links, filtering out already stored products."""
 
     html = page.content()
@@ -31,11 +31,15 @@ def get_product_links(page, db_data):
 
     urls = []
     for product in products:
-        url = product.find("a")["href"]
-        if url:
+        # write error message in log file if some links can't be scraped
+        try:
+            url = product.find("a")["href"]
             id = int(url.split("-")[-1])
             if id not in db_data:
                 urls.append(url)
+        except Exception:
+            logger.error(f"Failed to extract a url - {url}", exc_info=True)
+
     return urls
 
 

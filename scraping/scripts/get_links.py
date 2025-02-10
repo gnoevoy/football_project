@@ -1,10 +1,10 @@
 from playwright.sync_api import sync_playwright, Playwright
 from pathlib import Path
+from dotenv import load_dotenv
 import requests
-from datetime import date
 import sys
 import json
-import traceback
+import os
 
 # Set base path for helper functions
 base_path = Path.cwd() / "scraping"
@@ -16,16 +16,17 @@ from functions.db_helpers import get_scraped_ids
 from functions.logs import logs_setup
 
 # Setup logging
-logging_msg = logs_setup("get_links.log")
+logger = logs_setup("get_links.log")
 
 # Dictionary to store scraped links for each category
+load_dotenv(".credentials")
 links = {
     "boots": {
-        "base_url": "https://www.r-gol.com/en/football-boots?filters=131%5B7502%5D%7e135%5B7586%2C7547%2C7504%2C8212%2C7617%5D%7e152%5B83011%5D",
+        "base_url": os.getenv("BOOTS_URL"),
         "urls": [],
     },
     "balls": {
-        "base_url": "https://www.r-gol.com/en/footballs?filters=131%5B83115%5D%7e135%5B7586%2C7547%2C7504%2C8212%2C19117%5D",
+        "base_url": os.getenv("BALLS_URL"),
         "urls": [],
     },
 }
@@ -35,7 +36,7 @@ boots_db, balls_db = get_scraped_ids()
 
 
 def run(playwrigth=Playwright):
-    logging_msg.info("==========    Scraping started   ==========")
+    logger.info("SCRAPING STARTED")
 
     for category, data in links.items():
         try:
@@ -53,18 +54,20 @@ def run(playwrigth=Playwright):
 
             total_items = get_total_items(page)  # Count total products in category
             db_data = boots_db if category == "boots" else balls_db
-            skipped_pages = 0
+
+            logger.info("----------")
+            logger.info(f"{category.upper()}")
 
             # Loop through pagination until no more pages are available
             while True:
                 try:
                     # Extract product links from the current page
-                    product_links = get_product_links(page, db_data)
+                    product_links = get_product_links(page, db_data, logger)
                     data["urls"].extend(product_links)
-                except Exception as e:
-                    skipped_pages += 1
-                    traceback.print_exc()
-                    logging_msg.warning("Page skipped due to error", exc_info=True)
+                except Exception:
+                    logger.error(
+                        f"Page {page_num} skipped due to error - {url}", exc_info=True
+                    )
 
                 # Move to the next page if available
                 page_num += 1
@@ -77,21 +80,12 @@ def run(playwrigth=Playwright):
                 else:
                     break  # Stop when no more pages exist
 
-            # Log scraping summary for the category
-            message = {
-                "category": category,
-                "scraped_urls": len(data["urls"]),
-                "db_data": len(db_data),
-                "app_data": total_items,
-                "skipped_pages": skipped_pages,
-            }
-            print(message)
-            logging_msg.info(message)
+            # Category summary
+            logger.info(f"Scraped: {len(data["urls"])} | Total: {total_items}")
             browser.close()
 
-        except Exception as e:
-            traceback.print_exc()
-            logging_msg.error("An error occurred:", exc_info=True)
+        except Exception:
+            logger.error("Unexpected error", exc_info=True)
 
 
 # Run the scraper using Playwright
@@ -100,7 +94,15 @@ with sync_playwright() as pw:
 
 
 # Save scraped links to a JSON file
-file_path = base_path / "data" / "scraped_links.json"
+logger.info("----------")
+logger.info("OUTPUT")
+try:
+    file_path = base_path / "data" / "scraped_links.json"
+    with open(file_path, "w") as f:
+        json.dump(links, f, indent=4)
 
-with open(file_path, "w") as f:
-    json.dump(links, f, indent=4)
+    logger.info("File was successfully written")
+
+except Exception:
+    logger.error(f"Unexpected error", exc_info=True)
+logger.info("----------")

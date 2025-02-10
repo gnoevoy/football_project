@@ -1,12 +1,12 @@
-from bs4 import BeautifulSoup
+from bs4 import beautifulsoup
 import requests
 from datetime import datetime
 
 
 def render_product_page(page):
     """
-    Render and return the main content of the product page.
-    Ensures all necessary sections (description, features) are fully loaded.
+    render and return the main content of the product page.
+    ensures all necessary sections (description, features) are fully loaded.
     """
 
     main_content = page.locator("div.main-content-wrap")
@@ -15,7 +15,7 @@ def render_product_page(page):
     page.locator("a[aria-controls='info-text']").click()
 
     html = page.content()
-    soup = BeautifulSoup(html, "html.parser")
+    soup = beautifulsoup(html, "html.parser")
     content = soup.find("div", class_="main-content-wrap")
     return content
 
@@ -132,10 +132,7 @@ def get_product_features(content, product_id):
 
 
 def get_product_images(content, link, product_id, images_folder, category_folder):
-    """
-    Download and save all product images to the specified folder.
-    Images are named using the product ID and an incrementing number.
-    """
+    """Download and save all product images to the specified folder."""
 
     images = content.find("div", class_="VueCarousel-inner")
     image_num = 1
