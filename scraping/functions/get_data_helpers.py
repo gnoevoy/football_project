@@ -4,7 +4,7 @@ from datetime import datetime
 import pandas as pd
 
 
-def import_to_csv(data, raw_data_path, file_name):
+def export_to_csv(data, raw_data_path, file_name):
     df = pd.DataFrame(data)
     df.to_csv(raw_data_path / file_name, index=False, sep=";")
 
@@ -40,10 +40,10 @@ def get_product_data(content, url, product_id, category_id):
     )
     scraped_id = url.split("-")[-1]
     description = content.find("div", class_="product-params-content")
-    num_votes = content.find(
-        "div", class_="hydra-grade__reviews-count tm-score-platforms"
+    avg_vote_rate = content.find(
+        "div", class_="tm-grade-label__text tm-score-platforms"
     )
-    avg_vote_rate = content.find("div", class_="hydra-grade__value")
+    num_votes = content.find("div", class_="tm-grade-label__text tm-score-platforms")
 
     product = {
         "product_id": product_id,
@@ -57,8 +57,8 @@ def get_product_data(content, url, product_id, category_id):
         "description": (
             description.find("span").get_text(strip=True) if content else None
         ),
-        "num_votes": num_votes.find("span").get_text(strip=True) if num_votes else None,
         "avg_vote_rate": avg_vote_rate.text if avg_vote_rate else None,
+        "num_votes": num_votes.get("data-reviews") if num_votes else None,
     }
     return product
 
@@ -92,7 +92,7 @@ def get_product_colors(content, product_id, url, logger):
                     exc_info=True,
                 )
 
-    except Exception:
+    except Exception:  # Some products dont have colors -> not show error
         return product_colors, flag
     return product_colors, flag
 
@@ -149,7 +149,7 @@ def get_product_sizes(content, product_id, url, logger):
                     exc_info=True,
                 )
 
-    except Exception as e:
+    except Exception:
         flag = False
         logger.error(
             f"Product {product_id} failed to get sizes element - {url}", exc_info=True

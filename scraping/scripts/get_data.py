@@ -3,6 +3,7 @@ from pathlib import Path
 import sys
 import json
 
+
 # Set base path for helper functions
 base_path = Path.cwd() / "scraping"
 sys.path.append(str(base_path))
@@ -128,10 +129,10 @@ with sync_playwright() as pw:
 logger.info("----------")
 logger.info("OUTPUT")
 try:
-    import_to_csv(products, raw_data_path, "products.csv")
-    import_to_csv(labels, raw_data_path, "labels.csv")
-    import_to_csv(colors, raw_data_path, "colors.csv")
-    import_to_csv(sizes, raw_data_path, "sizes.csv")
+    export_to_csv(products, raw_data_path, "products.csv")
+    export_to_csv(labels, raw_data_path, "labels.csv")
+    export_to_csv(colors, raw_data_path, "colors.csv")
+    export_to_csv(sizes, raw_data_path, "sizes.csv")
 
     with open(raw_data_path / "product_features.json", "w") as f:
         json.dump(product_features, f, indent=4)
