@@ -1,8 +1,11 @@
 from sqlalchemy import create_engine, text
 from pymongo import MongoClient
+from google.cloud import storage
+from google.cloud.storage import transfer_manager
 from dotenv import load_dotenv
 import pandas as pd
 from datetime import datetime
+import json
 import os
 
 load_dotenv(".credentials")
@@ -70,3 +73,37 @@ def update_summary_table():
         )
         conn.execute(query, row)
         conn.commit()
+
+
+def load_to_mongo_db(clean_data_path):
+    with open(clean_data_path / "product_features.json", "r") as f:
+        product_features = json.load(f)
+
+    features_lst = [
+        {"_id": key, "product_id": key, **value}
+        for key, value in product_features.items()
+        if type(value) == dict
+    ]
+    mongo_product_features.insert_many(features_lst)
+    return len(features_lst)
+
+
+def upload_images_to_storage(img_dir, workers=8):
+    bucket_name = os.getenv("BUCKET_NAME")
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+
+    string_paths = [str(path.relative_to(img_dir)) for path in img_dir.rglob("*") if path.is_file()]
+
+    results = transfer_manager.upload_many_from_filenames(
+        bucket=bucket,
+        filenames=string_paths,
+        source_directory=img_dir,
+        blob_name_prefix="product-images/",
+        max_workers=workers
+    )
+
+    return len(string_paths)
+
+
+

@@ -16,11 +16,8 @@ def get_total_items(page):
 
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
-    total_items = soup.find(
-        "p", class_="products-list-controls-container__paragraph amount"
-    )
+    total_items = soup.find( "p", class_="products-list-controls-container__paragraph amount")
     return int(total_items.text) if total_items else None
-
 
 def get_product_links(page, db_data, logger):
     """Scrapes product links, filtering out already stored products."""

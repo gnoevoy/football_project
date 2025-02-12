@@ -8,3 +8,9 @@ json features
 
 *summary table change datetime (default one)
 
+=============================
+get links -> get product data with images -> clean it -> write to db's
+
+
+
+
