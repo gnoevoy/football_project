@@ -1,7 +1,10 @@
-1. connect mongo db via docker composer with UI
+products table:
+- avg votes where 0.00 display NULL
+- num votes convert to integer
 
-* createa a scheme in db postres
-* figure out how works mongo db
-2. writes bulk functions to load data 
+json features
+- remove first record
+- key lower_case_with_underscores
 
-3. overcome google load content functions
+*summary table change datetime (default one)
+

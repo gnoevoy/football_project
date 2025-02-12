@@ -1,4 +1,5 @@
 services:
+  # postgres database with UI
   postgres-db:
     image: postgres:16
     container_name: postgres-db
@@ -20,9 +21,32 @@ services:
     restart: always
     ports:
       - 8080:8080
+    depends_on:
+      - postgres-db
+
+  # mongo database with UI
+  mongo-db:
+    image: mongo
+    container_name: mongo-db
+    restart: always
+    ports:
+      - 27017:27017
+    env_file:
+      - .credentials
+    volumes:
+      - mongo-db:/data/db
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    env_file:
+      - .credentials
 
 volumes:
   postgres-db:
-  redis-db:
+  mongo-db:
 
 
