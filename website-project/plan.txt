@@ -1,8 +1,0 @@
-what to do at first?
-
-1. Render products in home, catalog, product pages
-    - add google cloud images
-    - filteing + pagination
-    - styling with fronted ??
-
-
