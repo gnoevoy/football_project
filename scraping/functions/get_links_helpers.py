@@ -16,8 +16,9 @@ def get_total_items(page):
 
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
-    total_items = soup.find( "p", class_="products-list-controls-container__paragraph amount")
+    total_items = soup.find("p", class_="products-list-controls-container__paragraph amount")
     return int(total_items.text) if total_items else None
+
 
 def get_product_links(page, db_data, logger):
     """Scrapes product links, filtering out already stored products."""
@@ -27,18 +28,14 @@ def get_product_links(page, db_data, logger):
     products = soup.select("div.category-grid__item:not(.last-brick)")
 
     urls = []
-    for product in products:
-        # write error message in log file if some links can't be scraped
+    for i, product in enumerate(products, start=1):
+        # Display message if some links can't be scraped
         try:
             url = product.find("a")["href"]
             id = int(url.split("-")[-1])
             if id not in db_data:
                 urls.append(url)
         except Exception:
-            logger.error(f"Failed to extract a url - {url}", exc_info=True)
+            logger.warning(f"Failed to extract {i} url", exc_info=True)
 
     return urls
-
-
-if __name__ == "__main__":
-    ...

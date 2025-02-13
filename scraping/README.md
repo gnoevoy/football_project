@@ -1,15 +1,5 @@
-products table:
-- avg votes where 0.00 display NULL
-- num votes convert to integer
+- what to do when scraped links doesnt have any links (check in each category)
 
-json features
-- remove first record
-- key lower_case_with_underscores
-
-*summary table change datetime (default one)
-
-=============================
-get links -> get product data with images -> clean it -> write to db's
 
 
 
