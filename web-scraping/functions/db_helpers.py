@@ -18,8 +18,8 @@ def example():
 # postgres connection
 USER = os.getenv("POSTGRES_USER")
 PASSWORD = os.getenv("POSTGRES_PASSWORD")
-HOST = os.getenv("POSTGRES_HOST", "localhost")
-PORT = os.getenv("POSTGRES_PORT", "5432")
+HOST = os.getenv("POSTGRES_HOST")
+PORT = os.getenv("POSTGRES_PORT")
 DB_NAME = os.getenv("POSTGRES_DB")
 SCHEMA = os.getenv("POSTGRES_SCHEMA")
 
@@ -33,7 +33,7 @@ mongo_db = client[os.getenv("MONGO_DB")]
 mongo_collection = mongo_db["product_features"]
 
 
-# gcp connection
+# gcs connection
 bucket_name = os.getenv("BUCKET_NAME")
 
 

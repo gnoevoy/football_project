@@ -2,7 +2,6 @@ from playwright.sync_api import sync_playwright, Playwright
 from pathlib import Path
 import traceback
 import sys
-import json
 
 
 # Set base path for helper functions
@@ -13,20 +12,14 @@ sys.path.append(str(base_path))
 from functions.get_links_helpers import handle_cookies
 from functions.get_data_helpers import *
 from functions.db_helpers import get_max_product_id
-from functions.logging import logs_setup
+from functions.logger import logs_setup
+from functions.bucket_helpers import get_scraped_links_from_gcs, load_file_to_gcs
 
 # Setup logging
 logger = logs_setup("get_data.log")
 
-# Define paths
-data_dir = base_path / "data"
-raw_data_path = data_dir / "raw"
-img_dir = data_dir / "img"
-json_links = data_dir / "scraped_links.json"
-
 # Load scraped links from JSON file
-with open(json_links, "r") as f:
-    links = json.load(f)
+links = get_scraped_links_from_gcs()
 
 # Initialize lists to store data for CSV files
 products, colors, sizes, labels, images = [], [], [], [], []
@@ -34,6 +27,7 @@ product_features = {}
 
 
 def run(playwrigth=Playwright):
+    logger.info("")
     logger.info("SCRAPING STARTED ...")
     max_product_id = get_max_product_id()  # Get the highest product_id from db
     product_id = max_product_id + 1
@@ -42,6 +36,12 @@ def run(playwrigth=Playwright):
         urls_lst = data["urls"]
         category_id = 1 if category == "boots" else 2
         counter = 0
+        logger.info("")
+
+        # Handle case when list is empty (no links)
+        if not urls_lst:
+            logger.warning(f"Skipping category {category.title()} - No URLs found.")
+            continue
 
         try:
             # Launch browser with image blocking
@@ -53,7 +53,6 @@ def run(playwrigth=Playwright):
 
             # Determine folder name for storing images
             category_folder = "boots" if category == "boots" else "balls"
-            logger.info("")
 
             for url in urls_lst:
                 try:
@@ -83,7 +82,7 @@ def run(playwrigth=Playwright):
                         product_features[product_id] = features
 
                     # Download and save product images
-                    product_images, flag_images = get_product_images(content, product_id, img_dir, category_folder, url, logger)
+                    product_images, flag_images = get_product_images(content, product_id, category_folder, url, logger)
                     images.extend(product_images)
 
                     # Check if all data were scraped successfully
@@ -111,24 +110,19 @@ def run(playwrigth=Playwright):
 with sync_playwright() as pw:
     run(pw)
 
-# Write scraped data to CSV / JSON files
+# Load scraped data to CSV / JSON files
 logger.info("")
 try:
-    save_as_csv(products, raw_data_path, "products.csv")
-    save_as_csv(labels, raw_data_path, "labels.csv")
-    save_as_csv(colors, raw_data_path, "colors.csv")
-    save_as_csv(sizes, raw_data_path, "sizes.csv")
-    save_as_csv(images, raw_data_path, "images.csv")
-
-    with open(raw_data_path / "product_features.json", "w") as f:
-        json.dump(product_features, f, indent=4)
-
+    load_file_to_gcs(products, "products.csv")
+    load_file_to_gcs(labels, "labels.csv")
+    load_file_to_gcs(colors, "colors.csv")
+    load_file_to_gcs(sizes, "sizes.csv")
+    load_file_to_gcs(images, "images.csv")
+    load_file_to_gcs(product_features, "product_features.json", csv=False)
     logger.info("Files were successfully written")
 
 except Exception:
     logger.error(f"Unexpected error", exc_info=True)
     traceback.print_exc()
-
 logger.info("")
 logger.info("--------------------------------------------------------------------")
-logger.info("")

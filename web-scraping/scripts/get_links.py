@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import requests
 import traceback
 import sys
-import json
 import os
 
 # Set base path for helper functions
@@ -14,7 +13,8 @@ sys.path.append(str(base_path))
 # Import helper functions
 from functions.get_links_helpers import handle_cookies, get_total_items, get_product_links
 from functions.db_helpers import get_scraped_ids
-from functions.logging import logs_setup
+from functions.logger import logs_setup
+from functions.bucket_helpers import load_json_links_to_gcs
 
 # Logging and credentials
 logger = logs_setup("get_links.log")
@@ -33,10 +33,11 @@ links = {
 }
 
 # Load product data from DB
-boots_db, balls_db = get_scraped_ids()
+boots_set, balls_set = get_scraped_ids()
 
 
 def run(playwrigth=Playwright):
+    logger.info("")
     logger.info("SCRAPING STARTED ...")
 
     for category, data in links.items():
@@ -53,7 +54,7 @@ def run(playwrigth=Playwright):
 
             handle_cookies(page)  # Dismiss cookie pop-ups
             total_items = get_total_items(page)  # Count total products in category
-            db_data = boots_db if category == "boots" else balls_db
+            db_data = boots_set if category == "boots" else balls_set
 
             # Loop through pagination until no more pages are available
             while True:
@@ -92,16 +93,11 @@ with sync_playwright() as pw:
 
 # Save scraped links to a JSON file
 try:
-    file_path = base_path / "data" / "scraped_links.json"
-    with open(file_path, "w") as f:
-        json.dump(links, f, indent=4)
-
+    load_json_links_to_gcs(links)
     logger.info("File was successfully written")
 
 except Exception:
     logger.error(f"Unexpected error", exc_info=True)
     traceback.print_exc()
-
 logger.info("")
 logger.info("--------------------------------------------------------------------")
-logger.info("")

@@ -1,12 +1,6 @@
 from bs4 import BeautifulSoup
-import requests
 from datetime import datetime
-import pandas as pd
-
-
-def save_as_csv(data, path, file_name):
-    df = pd.DataFrame(data)
-    df.to_csv(path / file_name, index=False, sep=";")
+from functions.bucket_helpers import load_img_to_gcs
 
 
 def render_product_page(page):
@@ -153,8 +147,8 @@ def get_product_features(content, product_id, url, logger):
     return features, flag
 
 
-def get_product_images(content, product_id, img_dir, category_folder, url, logger):
-    """Download and save all product images to the specified folder."""
+def get_product_images(content, product_id, category_folder, url, logger):
+    """Load product images to the bucket."""
 
     flag = True
     images = content.find("div", class_="VueCarousel-inner")
@@ -167,17 +161,13 @@ def get_product_images(content, product_id, img_dir, category_folder, url, logge
                 link = image["src"]
 
                 # add value to list
-                img = f"{category_folder}/{product_id}-{image_num}.jpg"
+                img_name = f"{category_folder}/{product_id}-{image_num}.jpg"
                 is_thumbnail = True if image_num == 1 else False
-                row = {"product_id": product_id, "image": img, "is_thumbnail": is_thumbnail}
+                row = {"product_id": product_id, "image": img_name, "is_thumbnail": is_thumbnail}
                 product_images.append(row)
 
-                # download image
-                img_path = img_dir / img
-                data = requests.get(link).content
-                with open(img_path, "wb") as f:
-                    f.write(data)
-
+                # upload image to gcs
+                load_img_to_gcs(link, img_name)
                 image_num += 1
 
             except Exception:

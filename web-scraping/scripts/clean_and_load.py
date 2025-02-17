@@ -9,7 +9,7 @@ base_path = Path.cwd() / "web-scraping"
 sys.path.append(str(base_path))
 
 # Import helper functions
-from functions.logging import logs_setup
+from functions.logger import logs_setup
 from functions.clean_data_helpers import clean_csv_files, clean_json_file
 from functions.db_helpers import load_to_db, update_summary_table, load_to_mongo, upload_images_to_storage
 

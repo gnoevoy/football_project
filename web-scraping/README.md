@@ -1,11 +1,12 @@
-- handle images to cloud storage
-- move db to bigqery and google nosql
-- orders and order_details tables
+- handle logger with google cloud ???
+- self hosted db's with google cloud ???
+
+
 - summary table update (correct date, new , category + orders)
+- orders and order_details tables
 
 
+- build etl pipeline with prefect
 
-
-- ensure script works (get data) if links were scraped 
 
 
