@@ -12,7 +12,13 @@ def clean_csv_files(products, labels, sizes):
 
     # additional tables
     labels["label"] = labels["label"].str.strip().str.title()
-    sizes["size"] = sizes["size"].str.strip()
+    sizes["size"] = sizes["size"].astype("str").str.strip()
+
+
+def get_min_id_by_category(products):
+    balls = products.query("category_id == 2")["product_id"].min()
+    boots = products.query("category_id == 1")["product_id"].min()
+    return boots, balls
 
 
 def clean_json_file(file_name):
@@ -23,7 +29,7 @@ def clean_json_file(file_name):
         row = {"_id": id, "product_id": id}
 
         for feature, value in features.items():
-            key = feature.strip().lower().replace(" ", "_")
+            key = feature.strip().lower().replace(" ", "_").replace(":", "").replace("'", "")
             data = value.strip().title()
             row[key] = data
         product_features.append(row)

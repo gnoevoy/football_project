@@ -1,7 +1,5 @@
-import pandas as pd
 from pathlib import Path
 import traceback
-import json
 import sys
 
 # Set base path for helper functions and paths
@@ -10,36 +8,32 @@ sys.path.append(str(base_path))
 
 # Import helper functions
 from functions.logger import logs_setup
-from functions.clean_data_helpers import clean_csv_files, clean_json_file
-from functions.db_helpers import load_to_db, update_summary_table, load_to_mongo, upload_images_to_storage
+from functions.clean_data_helpers import clean_csv_files, clean_json_file, get_min_id_by_category
+from functions.db_helpers import load_to_db, update_summary_table, load_to_mongo
+from functions.bucket_helpers import open_file_from_gcs, move_image_in_gcs
 
 # Setup logging
 logger = logs_setup("clean_and_load.log")
 
-# Define paths
-data_dir = base_path / "data"
-img_dir = data_dir / "img"
-raw_data_path = data_dir / "raw"
-
 
 try:
+    logger.info("")
     logger.info("DATA PREPARATION STARTED ...")
 
     # Import files
-    products = pd.read_csv(raw_data_path / "products.csv", delimiter=";", parse_dates=["created_at"])
-    colors = pd.read_csv(raw_data_path / "colors.csv", delimiter=";")
-    sizes = pd.read_csv(raw_data_path / "sizes.csv", delimiter=";")
-    labels = pd.read_csv(raw_data_path / "labels.csv", delimiter=";")
-    images = pd.read_csv(raw_data_path / "images.csv", delimiter=";")
-
-    with open(raw_data_path / "product_features.json", "r") as f:
-        features = json.load(f)
+    products = open_file_from_gcs("products.csv")
+    colors = open_file_from_gcs("colors.csv")
+    sizes = open_file_from_gcs("sizes.csv")
+    labels = open_file_from_gcs("labels.csv")
+    images = open_file_from_gcs("images.csv")
+    features = open_file_from_gcs("product_features.json", csv=False)
 
     logger.info("Data successfully imported")
 
     # Data cleaning and transformations
     clean_csv_files(products, labels, sizes)
     product_features = clean_json_file(features)
+    boots_id, balls_id = get_min_id_by_category(products)
     logger.info("Data successfully cleaned")
 
     logger.info("")
@@ -54,7 +48,7 @@ try:
     logger.info("Data successfully loaded to db")
 
     # Update summary table
-    summary_num = update_summary_table()
+    summary_num = update_summary_table(boots_id, balls_id)
     logger.info(f"Summary table successfully updated, added {summary_num} new products")
 
     # Load product features to mongo
@@ -62,7 +56,7 @@ try:
     logger.info(f"Data successfully loaded to mongo, added {mongo_num} records")
 
     # Load images to storage
-    images_num = upload_images_to_storage(img_dir)
+    images_num = move_image_in_gcs()
     logger.info(f"Images successfully loaded to storage, added {images_num} new images")
 
 except Exception:
@@ -71,4 +65,3 @@ except Exception:
 
 logger.info("")
 logger.info("--------------------------------------------------------------------")
-logger.info("")

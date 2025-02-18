@@ -1,12 +1,7 @@
-- handle logger with google cloud ???
-- self hosted db's with google cloud ???
+>> impelemnt logging ?
+>> schedule tasks with prefect - lear how 
 
-
-- summary table update (correct date, new , category + orders)
-- orders and order_details tables
-
-
-- build etl pipeline with prefect
-
-
+* place code to cloud 
+    - how to get the most recent and stable version of code
+    - will prefect get it and excute?
 
