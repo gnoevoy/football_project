@@ -1,6 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from time import gmtime
 
 
 # Setting for log files
@@ -14,6 +15,9 @@ def logs_setup(file_name):
         handlers=[log_handler],
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %I:%M",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
+    # set correct time
+    logging.Formatter.converter = gmtime
+
     return logging.getLogger(file_name)
