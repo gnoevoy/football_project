@@ -19,3 +19,12 @@ simle script generate num
 
 Write task results to cloud storage - connect to GCS (not in memory), result_storage
 can cache resutl to not rerurn again -> https://docs.prefect.io/v3/develop/task-caching
+
+prefect config set PREFECT_RESULTS_PERSIST_BY_DEFAULT=true
+You can configure remote storage (e.g., S3, GCS).
+
+
+caching:
+enable only for retries inside one specifc flow 
+* no other need because my scipt dynamic
+can store in docker container and deleting after finishing

@@ -1,5 +1,7 @@
 from prefect import task, flow
 from prefect.logging import get_run_logger
+from prefect.cache_policies import INPUTS, RUN_ID
+from datetime import timedelta
 from pathlib import Path
 import sys
 
@@ -10,7 +12,13 @@ from scripts.get_links import get_links
 from scripts.get_data import get_data
 from scripts.clean_and_load import clean_and_load
 
-params = {"retries": 2, "retry_delay_seconds": 10}
+params = {
+    "retries": 2,
+    "retry_delay_seconds": 10,
+    "persist_result": True,
+    "cache_policy": INPUTS + RUN_ID,
+    "cache_expiration": timedelta(days=1),
+}
 
 
 @task(name="scrape_links", **params)
@@ -37,7 +45,7 @@ def transform_and_upload():
     clean_and_load(logger)
 
 
-@flow(name="web_scraping", **params)
+@flow(name="web_scraping", retries=1, retry_delay_seconds=10)
 def main():
     is_empty = scrape_links()
     if is_empty:
