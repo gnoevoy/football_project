@@ -16,3 +16,6 @@ simle script generate num
     else -> notify about incorrect number
 * execute every minute
 
+
+Write task results to cloud storage - connect to GCS (not in memory), result_storage
+can cache resutl to not rerurn again -> https://docs.prefect.io/v3/develop/task-caching

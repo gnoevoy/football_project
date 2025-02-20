@@ -125,7 +125,7 @@ def get_product_sizes(content, product_id, url, logger):
     return product_sizes, flag
 
 
-def get_product_features(content, product_id, url, logger):
+def get_product_features(content, url, logger):
     """Extract and return product features from the features table."""
 
     features, flag = {}, True
