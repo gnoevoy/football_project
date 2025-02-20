@@ -6,11 +6,6 @@ import os
 
 load_dotenv(".credentials")
 
-
-def example():
-    return 1
-
-
 # CONNECTIONS
 
 # postgres connection
@@ -86,3 +81,13 @@ def update_summary_table(boots_id, balls_id):
 def load_to_mongo(lst):
     mongo_collection.insert_many(lst)
     return len(lst)
+
+
+# Get the highest order id from db
+def order_generetor_queries():
+    with engine.connect() as conn:
+        max_order_id = conn.execute(text("SELECT COALESCE(MAX(order_id), 0) FROM orders")).scalar()
+        product_query = conn.execute(text("SELECT product_id, price, old_price FROM products")).fetchall()
+        products = {row.product_id: {"price": row.price, "old_price": row.old_price} for row in product_query}
+
+    return int(max_order_id), products
