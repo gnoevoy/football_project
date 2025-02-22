@@ -1,9 +1,8 @@
 from prefect import task, flow
 from pathlib import Path
-import sys
 
 
-@task
+@task(log_prints=True)
 def scrape_links():
     print("hello")
 
@@ -20,6 +19,6 @@ def clean_and_load_to_db():
 
 @flow
 def scraping():
-    scrape_links()
-    scrape_data()
-    clean_and_load_to_db()
+    x = scrape_links()
+    y = scrape_data()
+    z = clean_and_load_to_db()
