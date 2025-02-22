@@ -1,7 +1,5 @@
 1. figure out how to deploy me script
 2. configurate it porperly 
-1. figure out how to deploy me script
-2. configurate it porperly 
 
 
 ------------
