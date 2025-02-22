@@ -65,8 +65,8 @@ if __name__ == "__main__":
 
     web_scraping.from_source(
         source="https://github.com/gnoevoy/football_project.git",
-        entrypoint="pipelines/scraping.py:web-scraping",
+        entrypoint="pipelines/scraping.py:web_scraping",
     ).deploy(
         name="web-scraping",
-        work_pool_name="web-scraping-local",
+        work_pool_name="docker-pool",
     )
