@@ -1,10 +1,6 @@
-links = {
-    "boots": {
-        "base_url": [],
-        "urls": [],
-    },
-    "balls": {
-        "base_url": [],
-        "urls": [1, 2, 3],
-    },
-}
+lst = []
+
+for i in range(3):
+    lst.append(i)
+
+print(lst)
