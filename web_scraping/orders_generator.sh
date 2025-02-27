@@ -1,12 +1,15 @@
 #! /usr/bin/bash
 
-# source paths
-SCRIPT_PATH=$(realpath "$0")
-SOURCE_DIR=$(dirname "$SCRIPT_PATH")
+ENV="/home/bars1k/football_project/env"
+FILE=" /home/bars1k/football_project/web_scraping/scripts/orders_generator.py"
+CREDENTIALS="/home/bars1k/football_project/.credentials"
 
-# env, code and error file
-PYTHON_ENV="$(cd "$SOURCE_DIR/../env/bin" && pwd)/python"
-PYTHON_SCRIPT="$SOURCE_DIR/scripts/orders_generator.py"
+# export credentials 
+set -a
+source $CREDENTIALS
+set +a
 
-# execute script
-$PYTHON_ENV $PYTHON_SCRIPT 
+# run code with env
+source $ENV/bin/activate
+python $FILE
+deactivate

@@ -40,7 +40,7 @@ def get_product_data(content, url, product_id, category_id):
         "category_id": category_id,
         "scraped_id": scraped_id,
         "url": url,
-        "created_at": datetime.now(timezone.utc),
+        # "created_at": datetime.now(timezone.utc),
         "title": title,
         "price": price,
         "old_price": old_price.text if old_price else None,

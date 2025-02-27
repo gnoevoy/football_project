@@ -94,6 +94,7 @@ def scrape_data(logger):
 
                 # Category summary
                 logger.info(f"Category: {category.title()}, Total: {len(urls_lst)}, Scraped: {counter}")
+                logger.info("")
 
             except Exception:
                 logger.error("Unexpected error", exc_info=True)

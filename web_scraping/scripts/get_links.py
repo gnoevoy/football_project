@@ -90,13 +90,13 @@ def scrape_links(logger):
     try:
         balls_num = len(links["balls"]["urls"])
         boots_num = len(links["boots"]["urls"])
-        is_empty = False
 
         # Check if there're new products in web app
         # if so write data and execute next steps in pipeline with the help of specifying boolean flag
         if balls_num + boots_num > 0:
             load_json_links_to_gcs(links)
             logger.info("File was successfully written into bucket")
+            is_empty = False
         else:
             is_empty = True
 

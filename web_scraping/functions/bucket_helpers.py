@@ -10,7 +10,7 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 sys.path.append(str(ROOT_DIR))
 
 # Import bucket connection
-from connections.db_connectios import bucket, bucket_name
+from utils.db_connectios import bucket, bucket_name
 
 web_scraping_path = "web-scraping/data/"
 

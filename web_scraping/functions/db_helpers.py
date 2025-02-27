@@ -8,7 +8,7 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 sys.path.append(str(ROOT_DIR))
 
 # import db connections
-from connections.db_connectios import engine, mongo_collection
+from utils.db_connectios import engine, mongo_collection
 
 
 # Get lists with existed products from db
