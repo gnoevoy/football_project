@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from pymongo import MongoClient
 from google.cloud import storage
 import os
@@ -28,19 +28,3 @@ mongo_collection = mongo_db["product_features"]
 bucket_name = os.getenv("BUCKET_NAME")
 storage_client = storage.Client()
 bucket = storage_client.bucket(bucket_name)
-
-
-def postgres_check_connection():
-    with engine.connect() as conn:
-        response = conn.execute(text("SELECT 1"))
-    return True if response else False
-
-
-def mongo_check_connection():
-    response = mongo_db.command("ping")
-    return response.get("ok") == 1.0
-
-
-def gcs_check_connection():
-    response = bucket.exists()
-    return True if response else False

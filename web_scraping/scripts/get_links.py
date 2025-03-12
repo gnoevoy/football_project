@@ -9,11 +9,10 @@ import os
 WEB_SCRAPING_DIR = Path(__file__).parent.parent
 sys.path.append(str(WEB_SCRAPING_DIR))
 
-
 # Import helper functions
 from functions.get_links_helpers import handle_cookies, get_total_items, get_product_links
-from functions.db_helpers import get_scraped_ids
-from functions.bucket_helpers import load_json_links_to_gcs
+from functions.db_helpers import get_scraped_products
+from functions.bucket_helpers import load_links_to_gcs
 
 # Credentials
 load_dotenv(".credentials")
@@ -31,7 +30,7 @@ links = {
 }
 
 # Load product data from DB
-boots_set, balls_set = get_scraped_ids()
+scraped_products = get_scraped_products()
 
 
 def scrape_links(logger):
@@ -48,25 +47,25 @@ def scrape_links(logger):
 
                 # Open the first category page
                 page_num = 1
-                url = f"{data['base_url']}&page={page_num}"
+                url = f"{data["base_url"]}&page={page_num}"
                 page.goto(url)
 
                 handle_cookies(page)  # Dismiss cookie pop-ups
                 total_items = get_total_items(page)  # Count total products in category
-                db_data = boots_set if category == "boots" else balls_set
+                scraped_ids = scraped_products["boots"] if category == "boots" else scraped_products["balls"]
 
                 # Loop through pagination until no more pages are available
                 while True:
                     try:
                         # Extract product links from the current page
-                        product_links = get_product_links(page, db_data, logger)
+                        product_links = get_product_links(page, scraped_ids, logger)
                         data["urls"].extend(product_links)
                     except Exception:
                         logger.error(f"Page {page_num} skipped, {url}", exc_info=True)
 
                     # Move to the next page if available
                     page_num += 1
-                    url = f"{data['base_url']}&page={page_num}"
+                    url = f"{data["base_url"]}&page={page_num}"
                     response = requests.get(url)
 
                     if response.status_code == 200:
@@ -88,13 +87,12 @@ def scrape_links(logger):
 
     # Save scraped links to a JSON file
     try:
+        # Check if there're new products in web app
         balls_num = len(links["balls"]["urls"])
         boots_num = len(links["boots"]["urls"])
 
-        # Check if there're new products in web app
-        # if so write data and execute next steps in pipeline with the help of specifying boolean flag
         if balls_num + boots_num > 0:
-            load_json_links_to_gcs(links)
+            load_links_to_gcs(links)
             logger.info("File was successfully written into bucket")
             is_empty = False
         else:

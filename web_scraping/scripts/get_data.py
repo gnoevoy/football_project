@@ -2,7 +2,6 @@ from playwright.sync_api import sync_playwright, Playwright
 from pathlib import Path
 import sys
 
-
 # Set base path for helper functions
 WEB_SCRAPING_DIR = Path(__file__).parent.parent
 sys.path.append(str(WEB_SCRAPING_DIR))
@@ -11,11 +10,10 @@ sys.path.append(str(WEB_SCRAPING_DIR))
 from functions.get_links_helpers import handle_cookies
 from functions.get_data_helpers import *
 from functions.db_helpers import get_max_product_id
-from functions.bucket_helpers import get_scraped_links_from_gcs, load_file_to_gcs
-
+from functions.bucket_helpers import get_links_from_gcs, load_file_to_gcs
 
 # Load scraped links from JSON file
-links = get_scraped_links_from_gcs()
+links = get_links_from_gcs()
 
 # Initialize lists to store data for CSV files
 products, colors, sizes, labels, images = [], [], [], [], []
@@ -82,8 +80,8 @@ def scrape_data(logger):
                         images.extend(product_images)
 
                         # Check if all data were scraped successfully
-                        success = [flag_colors, flag_labels, flag_sizes, flag_features, flag_images]
-                        if all(success):
+                        flags = [flag_colors, flag_labels, flag_sizes, flag_features, flag_images]
+                        if all(flags):
                             logger.info(f"Product {product_id} scraped successfully")
 
                         product_id += 1

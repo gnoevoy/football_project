@@ -1,6 +1,7 @@
-lst = []
+import pandas as pd
+import numpy as np
 
-for i in range(3):
-    lst.append(i)
+data = []
+df = pd.DataFrame(data)
 
-print(lst)
+print(df)

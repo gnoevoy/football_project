@@ -1,17 +1,4 @@
-create orders generator script > bash > cron
-    - add create at to orders 
-    - reset order_detail_id when deletes orders
-
-
-learn about cron jobs 
-    - new tools and approaches
-    - see logs of execion (schedule, errors) , dont need specifc erros log for each script
-    - bash script a bit????
-
-
-
-
-
-
-
-
+1. Learn and expirement with sqlachemy and gcs bucket 
+2. create code coverage and sections
+3. create a display of my products in web app with api
+1. hello 

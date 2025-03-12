@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
-from datetime import datetime, timezone
-from functions.bucket_helpers import load_img_to_gcs  # now sure about this import (cron job)
+from functions.bucket_helpers import load_img_to_gcs
 
 
 def render_product_page(page):
@@ -40,7 +39,6 @@ def get_product_data(content, url, product_id, category_id):
         "category_id": category_id,
         "scraped_id": scraped_id,
         "url": url,
-        # "created_at": datetime.now(timezone.utc),
         "title": title,
         "price": price,
         "old_price": old_price.text if old_price else None,
@@ -158,8 +156,6 @@ def get_product_images(content, product_id, category_folder, url, logger):
         image_num = 1
         for image in images.find_all("img"):
             try:
-                link = image["src"]
-
                 # add value to list
                 img_name = f"{category_folder}/{product_id}-{image_num}.jpg"
                 is_thumbnail = True if image_num == 1 else False
@@ -167,6 +163,7 @@ def get_product_images(content, product_id, category_folder, url, logger):
                 product_images.append(row)
 
                 # upload image to gcs
+                link = image["src"]
                 load_img_to_gcs(link, img_name)
                 image_num += 1
 

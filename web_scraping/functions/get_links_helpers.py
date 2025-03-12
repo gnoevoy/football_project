@@ -20,20 +20,20 @@ def get_total_items(page):
     return int(total_items.text) if total_items else None
 
 
-def get_product_links(page, db_data, logger):
+def get_product_links(page, scraped_ids, logger):
     """Scrapes product links, filtering out already stored products."""
 
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
     products = soup.select("div.category-grid__item:not(.last-brick)")
-
     urls = []
+
     for i, product in enumerate(products, start=1):
         # Display message if some links can't be scraped
         try:
             url = product.find("a")["href"]
             id = int(url.split("-")[-1])
-            if id not in db_data:
+            if id not in scraped_ids:
                 urls.append(url)
         except Exception:
             logger.warning(f"Failed to extract {i} url", exc_info=True)

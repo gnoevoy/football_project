@@ -1,5 +1,4 @@
 from sqlalchemy import text
-from datetime import datetime, timezone
 from pathlib import Path
 import sys
 
@@ -8,24 +7,30 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 sys.path.append(str(ROOT_DIR))
 
 # import db connections
-from utils.db_connectios import engine, mongo_collection
+from utils.connections import engine, mongo_collection
 
 
-# Get lists with existed products from db
-def get_scraped_ids():
+# Retrieve already scraped products ids
+def get_scraped_products():
     with engine.connect() as conn:
-        boots_ids = conn.execute(text("SELECT scraped_id FROM products WHERE category_id = 1")).fetchall()
-        balls_ids = conn.execute(text("SELECT scraped_id FROM products WHERE category_id = 2")).fetchall()
-        boots = set([int(row[0]) for row in boots_ids])
-        balls = set([int(row[0]) for row in balls_ids])
-    return boots, balls
+        products = conn.execute(text("SELECT category_id, scraped_id FROM products"))
+        dct = products.mappings().all()
+
+        res = {"boots": [], "balls": []}
+        for row in dct:
+            if row["category_id"] == 1:
+                res["boots"].append(row["scraped_id"])
+            else:
+                res["balls"].append(row["scraped_id"])
+        return res
 
 
 # Get the highest product id from db
 def get_max_product_id():
     with engine.connect() as conn:
-        max_product_id = conn.execute(text("SELECT COALESCE(MAX(product_id), 0) FROM products")).scalar()
-    return int(max_product_id)
+        max_product_id = conn.execute(text("SELECT COALESCE(MAX(product_id), 0) FROM products"))
+        num = max_product_id.scalar()
+    return num
 
 
 # Load dataframe to db
@@ -34,32 +39,16 @@ def load_to_db(df, table_name):
 
 
 # Update summary table, track how many records were added from scraping
-def update_summary_table(boots_id, balls_id):
+def update_summary_table(boots_num, balls_num):
     with engine.connect() as conn:
         total = conn.execute(text("SELECT COUNT(*) FROM products")).scalar()
-
-        if boots_id:
-            new_boots = conn.execute(text(f"SELECT COUNT(*) FROM products WHERE category_id = 1 AND product_id >= {boots_id}")).scalar()
-        else:
-            new_boots = 0
-
-        if balls_id:
-            new_balls = conn.execute(text(f"SELECT COUNT(*) FROM products WHERE category_id = 2 AND product_id >= {balls_id}")).scalar()
-        else:
-            new_balls = 0
-
-        row = {
-            "created_at": datetime.now(timezone.utc),
-            "total": total if total else 0,
-            "new_boots": new_boots if new_boots else 0,
-            "new_balls": new_balls if new_balls else 0,
-        }
+        row = {"total": total if total else 0, "new_boots": boots_num, "new_balls": balls_num}
 
         # Insert record and commit changes
-        query = text("INSERT INTO summary (created_at, total, new_boots, new_balls) VALUES (:created_at, :total, :new_boots, :new_balls)")
+        query = text("INSERT INTO summary (total, new_boots, new_balls) VALUES (:total, :new_boots, :new_balls)")
         conn.execute(query, row)
         conn.commit()
-    return new_balls + new_boots
+    return boots_num + balls_num
 
 
 # Load list of dictionaries to mongo

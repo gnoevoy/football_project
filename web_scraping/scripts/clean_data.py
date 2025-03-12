@@ -11,7 +11,7 @@ from functions.db_helpers import load_to_db, update_summary_table, load_to_mongo
 from functions.bucket_helpers import open_file_from_gcs, move_image_to_gcs, delete_blobs_from_gcs
 
 
-def clean_and_load_data(logger):
+def clean_data(logger):
 
     try:
         logger.info("DATA PREPARATION STARTED")
@@ -33,35 +33,11 @@ def clean_and_load_data(logger):
         logger.info("Data successfully cleaned")
 
         logger.info("")
-        logger.info("LOADING STARTED")
-
-        # Load to postgres db
-        load_to_db(products, "products")
-        load_to_db(colors, "colors")
-        load_to_db(sizes, "sizes")
-        load_to_db(labels, "labels")
-        load_to_db(images, "images")
-        logger.info("Data successfully loaded to db")
-
-        # Update summary table
-        summary_num = update_summary_table(boots_num, balls_num)
-        logger.info(f"Summary table successfully updated, added {summary_num} new products")
-
-        # Load product features to mongo
-        mongo_num = load_to_mongo(product_features)
-        logger.info(f"Data successfully loaded to mongo, added {mongo_num} records")
-
-        # Load images to storage
-        images_num = move_image_to_gcs()
-        logger.info(f"Images successfully loaded to storage, added {images_num} new images")
-        logger.info("")
 
     except Exception:
-        # clean images folder if something went wrong
-        delete_blobs_from_gcs()
         logger.error(f"Unexpected error", exc_info=True)
         logger.info("")
 
 
 if __name__ == "__main__":
-    clean_and_load_data()
+    clean_data()

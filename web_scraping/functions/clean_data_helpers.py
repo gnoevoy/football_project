@@ -16,8 +16,8 @@ def clean_csv_files(products, labels, sizes):
 
 
 def get_min_id_by_category(products):
-    balls = products.query("category_id == 2")["product_id"].min()
-    boots = products.query("category_id == 1")["product_id"].min()
+    balls = len(products.query("category_id == 2"))
+    boots = len(products.query("category_id == 1"))
     return boots, balls
 
 
