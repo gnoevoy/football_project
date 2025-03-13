@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 
-data = []
+data = [1, 2, 3]
 df = pd.DataFrame(data)
 
-print(df)
+x = pd.DataFrame(df)
+print(x)

@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright, Playwright
 from pathlib import Path
+import pandas as pd
 import sys
 
 # Set base path for helper functions
@@ -104,12 +105,13 @@ def scrape_data(logger):
 
     # Load scraped data to CSV / JSON files
     try:
-        load_file_to_gcs(products, "products.csv")
-        load_file_to_gcs(labels, "labels.csv")
-        load_file_to_gcs(colors, "colors.csv")
-        load_file_to_gcs(sizes, "sizes.csv")
-        load_file_to_gcs(images, "images.csv")
-        load_file_to_gcs(product_features, "product_features.json", csv=False)
+        raw_files_dir = "web-scraping/raw"
+        load_file_to_gcs(pd.DataFrame(products), raw_files_dir, "products.csv")
+        load_file_to_gcs(pd.DataFrame(labels), raw_files_dir, "labels.csv")
+        load_file_to_gcs(pd.DataFrame(colors), raw_files_dir, "colors.csv")
+        load_file_to_gcs(pd.DataFrame(sizes), raw_files_dir, "sizes.csv")
+        load_file_to_gcs(pd.DataFrame(images), raw_files_dir, "images.csv")
+        load_file_to_gcs(product_features, raw_files_dir, "product_features.json", csv=False)
         logger.info("Files were successfully written to bucket")
         logger.info("")
 

@@ -11,14 +11,10 @@ def clean_csv_files(products, labels, sizes):
     products["num_votes"] = np.where(products["num_votes"] == 0, np.nan, products["num_votes"])
 
     # additional tables
-    labels["label"] = labels["label"].str.strip().str.title()
     sizes["size"] = sizes["size"].astype("str").str.strip()
 
-
-def get_min_id_by_category(products):
-    balls = len(products.query("category_id == 2"))
-    boots = len(products.query("category_id == 1"))
-    return boots, balls
+    if len(labels) > 0:
+        labels["label"] = labels["label"].str.strip().str.title()
 
 
 def clean_json_file(file_name):

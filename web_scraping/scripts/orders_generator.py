@@ -1,4 +1,3 @@
-from datetime import datetime
 from pathlib import Path
 import sys
 import random
@@ -13,18 +12,11 @@ sys.path.append(str(ROOT_DIR))
 from utils.logger import setup_logger
 from web_scraping.functions.db_helpers import order_generetor_queries, load_to_db
 from web_scraping.functions.orders_helpers import generate_order, generate_order_detail
-from utils.db_connectios import postgres_check_connection
 
 try:
     # Set up logger for script
     LOGS_DIR = ROOT_DIR / "logs" / "orders_generator"
-    # timestamp = datetime.now().strftime("%Y-%m-%d_%H:%M")
     logger = setup_logger(LOGS_DIR / f"orders.log")
-
-    # Check db connections
-    postgres_check_connection() == True
-    logger.info("CONNECTIONS SUCCESSFULLY ESTABLISHED")
-    logger.info("")
 
     orders, order_details = [], []
     orders_num = random.randint(1, 3)

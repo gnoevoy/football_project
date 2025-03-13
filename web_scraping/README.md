@@ -1,4 +1,3 @@
-1. Learn and expirement with sqlachemy and gcs bucket 
-2. create code coverage and sections
-3. create a display of my products in web app with api
-1. hello 
+1. debug code when new error appears
+2. perhaps schedule with prefect????
+3. check if fixed outdated files retriving issue
