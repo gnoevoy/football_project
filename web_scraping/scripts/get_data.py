@@ -13,15 +13,14 @@ from functions.get_data_helpers import *
 from functions.db_helpers import get_max_product_id
 from functions.bucket_helpers import get_links_from_gcs, load_file_to_gcs
 
-# Load scraped links from JSON file
-links = get_links_from_gcs()
-
-# Initialize lists to store data for CSV files
-products, colors, sizes, labels, images = [], [], [], [], []
-product_features = {}
-
 
 def scrape_data(logger):
+    # Load scraped links from JSON file
+    links = get_links_from_gcs()
+
+    # Initialize lists to store data for CSV files
+    products, colors, sizes, labels, images = [], [], [], [], []
+    product_features = {}
 
     def run(playwrigth=Playwright):
         logger.info("DATA SCRAPING STARTED")

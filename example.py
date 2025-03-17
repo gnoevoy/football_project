@@ -1,8 +1,10 @@
-import pandas as pd
-import numpy as np
+def counter():
+    for i in range(5):
+        print(i)
 
-data = [1, 2, 3]
-df = pd.DataFrame(data)
 
-x = pd.DataFrame(df)
-print(x)
+counter()
+
+
+def hello():
+    print("hello")

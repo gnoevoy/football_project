@@ -14,26 +14,24 @@ from functions.get_links_helpers import handle_cookies, get_total_items, get_pro
 from functions.db_helpers import get_scraped_products
 from functions.bucket_helpers import load_links_to_gcs
 
-# Credentials
-load_dotenv(".credentials")
-
-# Dictionary to store scraped links for each category
-links = {
-    "boots": {
-        "base_url": os.getenv("BOOTS_URL"),
-        "urls": [],
-    },
-    "balls": {
-        "base_url": os.getenv("BALLS_URL"),
-        "urls": [],
-    },
-}
-
-# Load product data from DB
-scraped_products = get_scraped_products()
-
 
 def scrape_links(logger):
+    load_dotenv(".credentials")  # Credentials
+
+    # Dictionary to store scraped links for each category
+    links = {
+        "boots": {
+            "base_url": os.getenv("BOOTS_URL"),
+            "urls": [],
+        },
+        "balls": {
+            "base_url": os.getenv("BALLS_URL"),
+            "urls": [],
+        },
+    }
+
+    # Load product data from DB
+    scraped_products = get_scraped_products()
 
     def run(playwrigth=Playwright):
         logger.info("LINKS SCRAPING STARTED")

@@ -12,12 +12,10 @@ from web_scraping.scripts.get_data import scrape_data
 from web_scraping.scripts.clean_and_load import clean_and_load_data
 from web_scraping.functions.bucket_helpers import delete_blobs_from_gcs
 
-
 # Set up logger for script
 LOGS_DIR = PROJECT_DIR / "logs" / "web_scraping"
 timestamp = datetime.now().strftime("%Y-%m-%d_%H:%M")
 logger = setup_logger(LOGS_DIR / f"scraping_{timestamp}.log")
-
 
 try:
     # Main logic

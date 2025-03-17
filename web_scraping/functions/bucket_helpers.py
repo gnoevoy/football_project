@@ -17,11 +17,6 @@ def load_links_to_gcs(dct):
     content = json.dumps(dct, indent=4)
     destination = "web-scraping/scraped_links.json"
     blob = bucket.blob(destination)
-
-    # now sure if it works to get the latest version of file
-    if blob.exists():
-        blob.delete()
-
     blob.upload_from_string(content, content_type="application/json")
 
 
@@ -42,9 +37,6 @@ def load_img_to_gcs(link, img_name):
 def load_file_to_gcs(data, path, file_name, csv=True):
     destination = f"{path}/{file_name}"
     blob = bucket.blob(destination)
-
-    if blob.exists():
-        blob.delete()
 
     if csv:
         blob.upload_from_string(data.to_csv(index=False), content_type="text/csv")
@@ -75,7 +67,7 @@ def move_image_gcs():
         for blob in bucket.list_blobs(prefix=prefix):
             if blob.name.endswith(".jpg"):
                 blob_name = "/".join(blob.name.split("/")[3:])
-                destination = f"product-images/{blob_name}"
+                destination = f"product-images/{category}/{blob_name}"
                 bucket.copy_blob(blob, bucket, destination)
                 bucket.delete_blob(blob.name)
                 num += 1
