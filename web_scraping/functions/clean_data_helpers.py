@@ -13,7 +13,6 @@ def clean_csv_files(products, labels, sizes):
 
     # additional tables
     sizes["size"] = sizes["size"].astype("str").str.strip()
-
     if len(labels) > 0:
         labels["label"] = labels["label"].str.strip().str.title()
 

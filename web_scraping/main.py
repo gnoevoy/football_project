@@ -9,8 +9,8 @@ sys.path.append(str(PROJECT_DIR))
 from utils.logger import setup_logger
 from web_scraping.scripts.get_links import scrape_links
 from web_scraping.scripts.get_data import scrape_data
-from web_scraping.scripts.clean_and_load import clean_and_load_data
-from web_scraping.functions.bucket_helpers import delete_blobs_from_gcs
+from web_scraping.scripts.clean_data import clean_data
+from web_scraping.scripts.load_data import load_data
 
 # Set up logger for script
 LOGS_DIR = PROJECT_DIR / "logs" / "web_scraping"
@@ -24,11 +24,11 @@ try:
         logger.info("No new records in web app")
     else:
         scrape_data(logger)
-        clean_and_load_data(logger)
+        clean_data(logger)
+        load_data(logger)
 
     logger.info("-------------------------------------------------------")
 
 except Exception:
-    delete_blobs_from_gcs()
     logger.error(f"Unexpected error", exc_info=True)
     logger.info("-------------------------------------------------------")

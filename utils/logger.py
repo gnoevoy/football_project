@@ -8,5 +8,6 @@ def setup_logger(file_name):
         datefmt="%Y-%m-%d %H:%M:%S",
         filename=file_name,
     )
+
     logger = logging.getLogger()
     return logger

@@ -6,41 +6,28 @@ WEB_SCRAPING_DIR = Path(__file__).parent.parent
 sys.path.append(str(WEB_SCRAPING_DIR))
 
 # Import helper functions
-from functions.clean_data_helpers import clean_csv_files, clean_json_file
 from functions.bucket_helpers import open_file_from_gcs, move_image_gcs
 from functions.db_helpers import load_to_db, update_summary_table, load_to_mongo
 
 
-def clean_and_load_data(logger):
+def load_data(logger):
+    clean_files_dir = "web-scraping/clean"
 
     try:
-        logger.info("DATA CLEANING STARTED")
-
         # Import files
-        raw_files_dir = "web-scraping/raw"
-        products = open_file_from_gcs(raw_files_dir, "products.csv")
-        colors = open_file_from_gcs(raw_files_dir, "colors.csv")
-        sizes = open_file_from_gcs(raw_files_dir, "sizes.csv")
-        labels = open_file_from_gcs(raw_files_dir, "labels.csv")
-        images = open_file_from_gcs(raw_files_dir, "images.csv")
-        features = open_file_from_gcs(raw_files_dir, "product_features.json", csv=False)
-
-        logger.info("Data successfully imported")
-
-        # Data cleaning and transformations
-        clean_csv_files(products, labels, sizes)
-        product_features = clean_json_file(features)
-        logger.info("Data successfully cleaned")
-        logger.info("")
+        products = open_file_from_gcs(clean_files_dir, "products.csv")
+        colors = open_file_from_gcs(clean_files_dir, "colors.csv")
+        sizes = open_file_from_gcs(clean_files_dir, "sizes.csv")
+        labels = open_file_from_gcs(clean_files_dir, "labels.csv")
+        images = open_file_from_gcs(clean_files_dir, "images.csv")
+        features = open_file_from_gcs(clean_files_dir, "features.json", csv=False)
 
         logger.info("DATA LOADING STARTED")
 
         # Load to postgres db
         load_to_db(products, "products")
-        if len(colors) > 0:
-            load_to_db(colors, "colors")
-        if len(labels) > 0:
-            load_to_db(labels, "labels")
+        load_to_db(colors, "colors")
+        load_to_db(labels, "labels")
         load_to_db(sizes, "sizes")
         load_to_db(images, "images")
         logger.info("Data successfully loaded to db")
@@ -52,7 +39,7 @@ def clean_and_load_data(logger):
         logger.info(f"Summary table successfully updated, added {summary_num} new products")
 
         # Load product features to mongo
-        mongo_num = load_to_mongo(product_features)
+        mongo_num = load_to_mongo(features)
         logger.info(f"Data successfully loaded to mongo, added {mongo_num} records")
 
         # Load images to storage
@@ -66,4 +53,4 @@ def clean_and_load_data(logger):
 
 
 if __name__ == "__main__":
-    clean_and_load_data()
+    load_data()

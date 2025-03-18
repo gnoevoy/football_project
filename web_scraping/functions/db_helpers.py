@@ -33,9 +33,10 @@ def get_max_product_id():
     return num
 
 
-# Load dataframe to db
+# Load dataframe to db if there're records in dataframe
 def load_to_db(df, table_name):
-    df.to_sql(table_name, engine, if_exists="append", index=False)
+    if len(df) > 0:
+        df.to_sql(table_name, engine, if_exists="append", index=False)
 
 
 # Update summary table, track how many records were added from scraping
@@ -59,10 +60,10 @@ def load_to_mongo(lst):
 
 
 # Get the highest order id from db
-def order_generetor_queries():
-    with engine.connect() as conn:
-        max_order_id = conn.execute(text("SELECT COALESCE(MAX(order_id), 0) FROM orders")).scalar()
-        product_query = conn.execute(text("SELECT product_id, price, old_price FROM products")).fetchall()
-        products = {row.product_id: {"price": row.price, "old_price": row.old_price} for row in product_query}
+# def order_generetor_queries():
+#     with engine.connect() as conn:
+#         max_order_id = conn.execute(text("SELECT COALESCE(MAX(order_id), 0) FROM orders")).scalar()
+#         product_query = conn.execute(text("SELECT product_id, price, old_price FROM products")).fetchall()
+#         products = {row.product_id: {"price": row.price, "old_price": row.old_price} for row in product_query}
 
-    return int(max_order_id), products
+#     return int(max_order_id), products

@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import requests
 import pandas as pd
 import json
@@ -13,6 +14,7 @@ sys.path.append(str(PROJECT_DIR))
 from utils.connections import bucket
 
 
+# Load scraped links json file to bucket
 def load_links_to_gcs(dct):
     content = json.dumps(dct, indent=4)
     destination = "web-scraping/scraped_links.json"
@@ -20,6 +22,7 @@ def load_links_to_gcs(dct):
     blob.upload_from_string(content, content_type="application/json")
 
 
+# Extract scraped links from bucket
 def get_links_from_gcs():
     blob = bucket.blob("web-scraping/scraped_links.json")
     data = blob.download_as_string()
@@ -27,6 +30,7 @@ def get_links_from_gcs():
     return links
 
 
+# Extract image fron website and upload to bucket
 def load_img_to_gcs(link, img_name):
     content = requests.get(link).content
     destination = f"web-scraping/img/{img_name}"
@@ -34,8 +38,8 @@ def load_img_to_gcs(link, img_name):
     blob.upload_from_string(content, content_type="image/jpeg")
 
 
-def load_file_to_gcs(data, path, file_name, csv=True):
-    destination = f"{path}/{file_name}"
+def load_file_to_gcs(data, dir, file_name, csv=True):
+    destination = f"{dir}/{file_name}"
     blob = bucket.blob(destination)
 
     if csv:
@@ -45,8 +49,8 @@ def load_file_to_gcs(data, path, file_name, csv=True):
         blob.upload_from_string(content, content_type="application/json")
 
 
-def open_file_from_gcs(path, file_name, csv=True):
-    blob = bucket.blob(f"{path}/{file_name}")
+def open_file_from_gcs(dir, file_name, csv=True):
+    blob = bucket.blob(f"{dir}/{file_name}")
 
     if csv:
         data = blob.download_as_bytes()
@@ -57,6 +61,7 @@ def open_file_from_gcs(path, file_name, csv=True):
         return data
 
 
+# Move images to "product-images" directory in bucket
 def move_image_gcs():
     categories = ["boots", "balls"]
     num = 0
@@ -65,23 +70,23 @@ def move_image_gcs():
         prefix = f"web-scraping/img/{category}"
 
         for blob in bucket.list_blobs(prefix=prefix):
-            if blob.name.endswith(".jpg"):
-                blob_name = "/".join(blob.name.split("/")[3:])
-                destination = f"product-images/{category}/{blob_name}"
-                bucket.copy_blob(blob, bucket, destination)
-                bucket.delete_blob(blob.name)
-                num += 1
+            blob_name = "/".join(blob.name.split("/")[3:])
+            destination = f"product-images/{category}/{blob_name}"
+            bucket.copy_blob(blob, bucket, destination)
+            blob.delete()
+            num += 1
+
     return num
 
 
-# delete blobl if something went wrong while loading to db / storage data
+# Delete blob if something went wrong while loading to db / storage data
 def delete_blobs_from_gcs():
     categories = ["boots", "balls"]
 
     # retrieve all files from folder
     for category in categories:
         prefix = f"web-scraping/img/{category}"
+        blobs = bucket.list_blobs(prefix=prefix)
 
-        for blob in bucket.list_blobs(prefix=prefix):
-            if blob.name.endswith(".jpg"):
-                bucket.delete_blob(blob.name)
+        with ThreadPoolExecutor(max_workers=10) as exec:
+            exec.map(lambda blob: blob.delete() if blob.name.endswith(".jpg") else None, blobs)

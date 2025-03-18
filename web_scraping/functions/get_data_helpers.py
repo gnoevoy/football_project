@@ -2,9 +2,8 @@ from bs4 import BeautifulSoup
 from functions.bucket_helpers import load_img_to_gcs
 
 
+# Loads and expands necessary sections of the product page.
 def render_product_page(page):
-    """Render and return the main content of the product page."""
-
     main_content = page.locator("div.main-content-wrap")
     main_content.wait_for()
 
@@ -18,11 +17,8 @@ def render_product_page(page):
     return content
 
 
-# This function lacks error handling to ensure all content is scraped.
-# If an error occurs, the product is skipped.
+# Extracts product main data
 def get_product_data(content, url, product_id, category_id):
-    """Extract and return product info"""
-
     title = content.find("h1", class_="product-card__title").text
     price = content.find(
         "span",
@@ -49,19 +45,12 @@ def get_product_data(content, url, product_id, category_id):
     return product
 
 
-# The functions below follow a similar logic:
-# 1. They attempt to access a specific element, if unsuccessful -> display error.
-# 2. If the element is found, they extract individual sub-elements and scrape the required data.
-# 3. Each function includes a flag to track whether the scraping process was fully successful.
-
-
+# Extracts available color variations for the product.
 def get_product_colors(content, product_id, url, logger):
-    """Extract and return all available colors for the product."""
-
     product_colors, flag = [], True
     colors = content.find("ul", class_="model-group-products__wrap model-group-products__wrap--expandable")
 
-    # Some products may not have colors, if missing -> proceed with scraping.
+    # Some products may not have colors
     if colors:
         try:
             for color in colors.find_all("a", class_="model-group-products__link"):
@@ -76,12 +65,14 @@ def get_product_colors(content, product_id, url, logger):
         except Exception:
             logger.error(f"Cannot access color element, {url}", exc_info=True)
             return product_colors, flag
+    else:
+        logger.warning(f"No colors for product {url}")
+
     return product_colors, flag
 
 
+# Extract and return all available labels for the product.
 def get_product_labels(content, product_id, url, logger):
-    """Extract and return all available labels for the product."""
-
     product_labels, flag = [], True
 
     try:
@@ -100,9 +91,8 @@ def get_product_labels(content, product_id, url, logger):
     return product_labels, flag
 
 
+# Extract and return all available sizes for the product
 def get_product_sizes(content, product_id, url, logger):
-    """Extract and return all available sizes for the product."""
-
     product_sizes, flag = [], True
 
     try:
@@ -123,9 +113,8 @@ def get_product_sizes(content, product_id, url, logger):
     return product_sizes, flag
 
 
+# Extract and return product features from the features table
 def get_product_features(content, url, logger):
-    """Extract and return product features from the features table."""
-
     features, flag = {}, True
 
     try:
@@ -145,9 +134,8 @@ def get_product_features(content, url, logger):
     return features, flag
 
 
+# Load product images to the bucket
 def get_product_images(content, product_id, category_folder, url, logger):
-    """Load product images to the bucket."""
-
     flag = True
     images = content.find("div", class_="VueCarousel-inner")
     product_images = []
