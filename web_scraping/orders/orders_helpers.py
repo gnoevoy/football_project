@@ -37,7 +37,6 @@ def generate_order(order_id):
         "customer_id": random.randint(1, 1000),
         "order_date": fake.date_time_this_year(),
         "payment_method": random.choices(["Bank Transfers", "BLIK", "Credit Card", "Digital Wallet"], weights=[35, 30, 20, 15], k=1)[0],
-        "payment_status": random.choices(["paid", "unpaid", "refunded"], weights=[70, 20, 10], k=1)[0],
         "region": region,
         "city": city,
     }

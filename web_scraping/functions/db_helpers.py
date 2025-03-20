@@ -60,10 +60,18 @@ def load_to_mongo(lst):
 
 
 # Get the highest order id from db
-# def order_generetor_queries():
-#     with engine.connect() as conn:
-#         max_order_id = conn.execute(text("SELECT COALESCE(MAX(order_id), 0) FROM orders")).scalar()
-#         product_query = conn.execute(text("SELECT product_id, price, old_price FROM products")).fetchall()
-#         products = {row.product_id: {"price": row.price, "old_price": row.old_price} for row in product_query}
+def order_generetor_queries():
+    with engine.connect() as conn:
+        max_order_id = conn.execute(text("SELECT COALESCE(MAX(order_id), 0) FROM orders")).scalar()
+        product_query = conn.execute(text("SELECT product_id, price, old_price FROM products")).fetchall()
+        products = {row.product_id: {"price": row.price, "old_price": row.old_price} for row in product_query}
 
-#     return int(max_order_id), products
+        product_sizes = conn.execute(text("SELECT product_id, size FROM sizes WHERE in_stock IS TRUE")).mappings().all()
+        sizes = {}
+        for row in product_sizes:
+            if row["product_id"] not in sizes:
+                sizes[row["product_id"]] = [row["size"]]
+            else:
+                sizes[row["product_id"]].append(row["size"])
+
+    return int(max_order_id), products, sizes

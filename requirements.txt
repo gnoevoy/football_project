@@ -29,9 +29,11 @@ decorator==5.1.1
 Deprecated==1.2.18
 Django==5.1.6
 django-environ==0.12.0
+django-filter==25.1
 django-storages==1.14.4
 dnspython==2.7.0
 docker==7.1.0
+ecdsa==0.19.1
 exceptiongroup==1.2.2
 executing==2.2.0
 Faker==36.1.1
@@ -86,6 +88,7 @@ orjson==3.10.15
 packaging==24.2
 pandas==2.2.3
 parso==0.8.4
+passlib==1.7.4
 pathspec==0.12.1
 pendulum==3.0.0
 pexpect==4.9.0
@@ -104,7 +107,7 @@ psycopg==3.2.4
 psycopg2-binary==2.9.10
 ptyprocess==0.7.0
 pure_eval==0.2.3
-pyasn1==0.6.1
+pyasn1==0.4.8
 pyasn1_modules==0.4.1
 pycparser==2.22
 pydantic==2.10.6
@@ -116,6 +119,8 @@ Pygments==2.19.1
 pymongo==4.11.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
+python-jose==3.4.0
+python-multipart==0.0.20
 python-slugify==8.0.4
 python-socks==2.7.1
 pytz==2024.2
