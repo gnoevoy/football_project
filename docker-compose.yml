@@ -1,4 +1,21 @@
 services:
+  # rest api
+  fastapi:
+    build:
+      context: ./rest_api
+      dockerfile: Dockerfile
+    container_name: fastapi
+    restart: always
+    volumes:
+      - ./rest_api:/app
+    ports:
+      - 8082:8082
+    env_file:
+      - .credentials
+    depends_on:
+      - postgres-db
+      - mongo-db
+
   # postgres database with UI
   postgres-db:
     image: postgres:16

@@ -7,7 +7,7 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 sys.path.append(str(ROOT_DIR))
 
 # import db connections
-from utils.connections import engine, mongo_collection
+from utils.db_connections import engine, mongo_collection
 
 
 # Retrieve already scraped products ids

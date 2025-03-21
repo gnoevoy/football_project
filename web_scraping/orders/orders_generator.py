@@ -11,7 +11,7 @@ sys.path.append(str(ROOT_DIR))
 # Import helper functions
 from utils.logger import setup_logger
 from web_scraping.functions.db_helpers import order_generetor_queries, load_to_db
-from web_scraping.orders.orders_helpers import generate_order, generate_order_detail
+from orders_helpers import generate_order, generate_order_detail
 
 # Set up logger for script
 LOGS_DIR = ROOT_DIR / "logs" / "orders_generator"

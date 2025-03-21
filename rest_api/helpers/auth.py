@@ -1,30 +1,29 @@
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi import Depends, HTTPException, status
-from pydantic import BaseModel
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy import text
 from dotenv import load_dotenv
-from pathlib import Path
-import sys
+from pydantic import BaseModel
 import os
 
-PROJECT_DIR = Path(__file__).parent.parent
-sys.path.append(str(PROJECT_DIR))
 
-from utils.connections import engine
+# Import DB connection and models
+from helpers.db_connections import engine
 
 load_dotenv(".credentials")
 
+# JWT settings
+secret_key = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-secret_key = os.getenv("SECRET_KEY")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")  # Password hashing setup
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")  # OAuth2 setup
 
 
+# Define data models
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -44,14 +43,17 @@ class UserInDB(User):
     hashed_password: str
 
 
+# Check if a plain password matches the hashed one
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
+# Hash a new password before storing it
 def get_password_hash(password):
     return pwd_context.hash(password)
 
 
+# Query the DB for a user by user name
 def get_user_data_from_db(user_name):
     with engine.connect() as conn:
         user = conn.execute(text("SELECT * FROM users WHERE user_name = :user_name"), {"user_name": user_name})
@@ -59,11 +61,13 @@ def get_user_data_from_db(user_name):
     return data[0] if data else None
 
 
+# Convert DB row to a Pydantic user model
 def get_user_data(user_data):
     if user_data:
         return UserInDB(**user_data)
 
 
+# Authenticate user by checking username and password
 def authenticate_user(user_name, password):
     data = get_user_data_from_db(user_name)
     user = get_user_data(data)
@@ -75,6 +79,7 @@ def authenticate_user(user_name, password):
     return user
 
 
+# Generate JWT token for user
 def create_access_token(data, expires_delta: timedelta):
     to_encode = data.copy()
     if expires_delta:
@@ -87,6 +92,7 @@ def create_access_token(data, expires_delta: timedelta):
     return encoded_jwt
 
 
+# Extract user info from token (used as a dependency in routes)
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials", headers={"WWW-Authenticate": "Bearer"}
@@ -109,6 +115,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 
 
+# Ensure user is active (not disabled)
 async def get_current_active_user(current_user: UserInDB = Depends(get_current_user)):
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
@@ -116,6 +123,7 @@ async def get_current_active_user(current_user: UserInDB = Depends(get_current_u
     return current_user
 
 
+# Main login route handler
 def generate_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -127,4 +135,5 @@ def generate_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(data={"sub": user.user_name}, expires_delta=access_token_expires)
 
+    # Return token in format required by OAuth2PasswordBearer
     return {"access_token": access_token, "token_type": "bearer"}
