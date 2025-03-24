@@ -15,14 +15,14 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 
 # Route to retrieve all orders
-@app.get("/orders/", response_model=User)
+@app.get("/orders/")
 def get_orders(db=Depends(get_db), curent_user: User = Depends(get_current_active_user)):
     data = display_orders(db)
     return data
 
 
 # Route to retrieve products by category
-@app.get("/{category}/", response_model=User)
+@app.get("/{category}/")
 def get_products(category, db=Depends(get_db), current_user: User = Depends(get_current_active_user)):
     categories = ["boots", "balls"]
     if category not in categories:

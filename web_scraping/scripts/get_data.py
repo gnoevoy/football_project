@@ -19,7 +19,7 @@ def scrape_data(logger):
     # Load scraped links from JSON file
     links = get_links_from_gcs()
 
-    # Delete image from bucket before scraping new products
+    # Delete images from bucket before scraping new products
     delete_blobs_from_gcs()
 
     # Initialize lists to store data for CSV files

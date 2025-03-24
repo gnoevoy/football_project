@@ -11,7 +11,7 @@ PROJECT_DIR = Path(__file__).parent.parent.parent
 sys.path.append(str(PROJECT_DIR))
 
 # Import bucket connection
-from utils.db_connections import bucket
+from utils.connections import bucket
 
 
 # Load scraped links json file to bucket

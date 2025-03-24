@@ -17,6 +17,7 @@ LOGS_DIR = PROJECT_DIR / "logs" / "web_scraping"
 timestamp = datetime.now().strftime("%Y-%m-%d_%H:%M")
 logger = setup_logger(LOGS_DIR / f"scraping_{timestamp}.log")
 
+
 try:
     # Main logic
     is_empty = scrape_links(logger)

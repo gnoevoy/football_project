@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from pymongo import MongoClient
+from google.cloud import storage
 import os
 
 load_dotenv(".credentials")
@@ -19,3 +20,8 @@ mongo_url = os.getenv("MONGO_URL")
 client = MongoClient(mongo_url)
 mongo_db = client[os.getenv("MONGO_DB")]
 mongo_collection = mongo_db["product_features"]
+
+# gcs connection
+bucket_name = os.getenv("BUCKET_NAME")
+storage_client = storage.Client()
+bucket = storage_client.bucket(bucket_name)

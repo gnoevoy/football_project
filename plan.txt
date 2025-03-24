@@ -1,0 +1,6 @@
+web-scraping
+- figure out how run on schedule evertyings
+
+api
+- query chekcs 
+- plan for building a pipeline
