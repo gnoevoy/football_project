@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from helpers.db_queries import get_db, display_products, display_orders
+from helpers.functions import get_db, display_products, display_orders
 from helpers.auth import get_current_active_user, generate_access_token
 from helpers.auth import Token, User
+
 
 app = FastAPI()
 

@@ -1,4 +1,5 @@
 env
+.env
 .credentials
 __pycache__/
 logs/

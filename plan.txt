@@ -1,6 +1,19 @@
-web-scraping
-- figure out how run on schedule evertyings
+work with bigquery - discover it 
 
-api
-- query chekcs 
-- plan for building a pipeline
+
+
+----------------------------------
+
+
+1. Understand how build pipelines in docker containers
+    - kubernetis?
+    - run on schedule containers?
+2. How to work with logs in docker 
+
+3. parallel exection, creating db, docker container for web-scraping, rewriting script, 
+
+4. buid new pipeline, learn what is bigquery
+
+5. analytics? some statistics, power bi dashboard, ml model?
+
+

@@ -10,9 +10,10 @@ import os
 
 
 # Import DB connection and models
-from helpers.db_connections import engine
+from helpers.connections import engine
 
-load_dotenv(".credentials")
+load_dotenv(".env")
+
 
 # JWT settings
 secret_key = os.getenv("SECRET_KEY")
