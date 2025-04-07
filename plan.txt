@@ -1,3 +1,15 @@
+1. Rewrite web-SCRAPING
+-> remove images
+-> handle paths, credentislas
+-> proper structure 
+-> learn about parralle execution
+
+logic
+
+
+
+
+
 WEB SCRAPING 
 - extract links from catalog
 - extrat data from links -> write to raw files
