@@ -1,6 +1,20 @@
-web-scraping
-- figure out how run on schedule evertyings
+WEB SCRAPING 
+- extract links from catalog
+- extrat data from links -> write to raw files
+- transform data -> write to clean files
+- load files to db's
 
-api
-- query chekcs 
-- plan for building a pipeline
+BIGQUERY
+- extract data from API -> store raw files
+- transform row files -> write to clean files
+- upload to bigquery
+
+>> run inside docker container
+>> retrieve logs from docker container
+>> optmize code: error handling, paths, parallel execution
+
+=======================================================================
+
+
+REST API
+- structure data in json format

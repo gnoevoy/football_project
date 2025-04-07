@@ -1,4 +1,4 @@
-from helpers.db_connections import engine, mongo_collection
+from helpers.connections import engine, mongo_collection
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from collections import defaultdict
