@@ -20,3 +20,15 @@ def load_file_to_bucket(data, dir, file_name, file_type="json"):
     if file_type == "json":
         content = json.dumps(data, indent=4)
         blob.upload_from_string(content, content_type="application/json")
+
+
+def get_file_from_bucket(dir, file_name, file_type="json"):
+    if file_type == "csv":
+        path = f"gs://{bucket_name}/{dir}/{file_name}"
+        df = pd.read_csv(path)
+        return df
+
+    if file_type == "json":
+        blob = bucket.blob(f"{dir}/{file_name}")
+        data = json.loads(blob.download_as_string())
+        return data

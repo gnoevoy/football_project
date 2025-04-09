@@ -1,7 +1,6 @@
-add time to compare scripts with each other
+1. add time for each script and overall time
 
-execute faster code
-https://www.youtube.com/watch?v=IEEhzQoKtQU
-https://www.youtube.com/watch?v=fKl2JW_qrso
-https://www.youtube.com/watch?v=A_Z1lgZLSNc
-https://www.youtube.com/watch?v=2Koubj0fF9U
+cleaning data script in jupyter notebook
+
+* docker compose add simple variables for services
+* parrallel executin ?????

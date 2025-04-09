@@ -38,7 +38,7 @@ def get_product_data(content, url, product_id, category_id):
         "title": title,
         "price": price,
         "old_price": old_price.text if old_price else None,
-        "description": (description.find("span").get_text(strip=True) if content else None),
+        "description": description.find("span").get_text(strip=True) if description else None,
         "avg_vote_rate": avg_vote_rate.text if avg_vote_rate else None,
         "num_votes": num_votes.get("data-reviews") if num_votes else None,
     }

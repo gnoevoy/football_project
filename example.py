@@ -1,2 +1,6 @@
-for i in range(1000):
-    print(i)
+lst = []
+
+dct = {"username": "username", "password": "password"}
+
+lst.append(dct)
+print(lst)

@@ -19,6 +19,7 @@ def handle_cookies(page):
     expect(cookie).to_be_hidden()
 
 
+# get number of items in the category for logs
 def get_total_items(page):
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
@@ -30,7 +31,7 @@ def get_links(page, data, logger):
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
     items = soup.select("div.category-grid__item:not(.last-brick)")
-    num_scraped, num_passed = 0, 0
+    scraped_num = 0
     lst = []
 
     for i, item in enumerate(items, start=1):
@@ -41,10 +42,9 @@ def get_links(page, data, logger):
             # check if the product is already scraped
             if product_id not in data:
                 lst.append(url)
-                num_scraped += 1
-            num_passed += 1
+                scraped_num += 1
 
         except Exception:
-            logger.error(f"Failed to extract {i} url, content: {item}", exc_info=True)
+            logger.error(f"Failed to extract url {i}, content: {item}", exc_info=True)
 
-    return lst, len(items), num_scraped, num_passed
+    return lst, len(items), scraped_num

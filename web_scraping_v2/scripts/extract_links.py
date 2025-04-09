@@ -2,6 +2,7 @@ from playwright.sync_api import sync_playwright, Playwright
 from dotenv import load_dotenv
 from pathlib import Path
 import requests
+import time
 import sys
 import os
 
@@ -33,7 +34,7 @@ dct = {
 def scrape_links(logger, playwrigth=Playwright):
     logger.info("EXTRACTING LINKS ...")
 
-    # load product from DB to avoid scraping already scraped products
+    # load product from DB to avoid scraping already existing products
     scraped_boots, scraped_balls = get_scraped_products()
 
     for category, data in dct.items():
@@ -47,17 +48,15 @@ def scrape_links(logger, playwrigth=Playwright):
             page, browser = open_catalog(playwrigth, url)
             handle_cookies(page)
             total_items = get_total_items(page)
-            total_passed = 0
 
             # loop through pages and scrape links
+            t1_category = time.perf_counter()
             while True:
                 try:
-                    # add parrallel execution of links from page
-
-                    links, page_total, page_scraped, page_passed = get_links(page, scraped_data, logger)
+                    links, page_total, scraped_num = get_links(page, scraped_data, logger)
                     data["urls"].extend(links)
-                    total_passed += page_passed
-                    logger.info(f"Page: {page_num}, scraped: {page_scraped}, passed: {page_passed}, total on page: {page_total}")
+                    # page summmary
+                    logger.info(f"Page: {page_num}, scraped: {scraped_num}, items on page: {page_total}")
                 except Exception:
                     logger.error(f"Page {page_num} skipped, {url}", exc_info=True)
 
@@ -74,11 +73,13 @@ def scrape_links(logger, playwrigth=Playwright):
                     break
 
             # category summary
-            logger.info(f"Category: {category}, scraped: {len(data["urls"])}, passed: {total_passed}, total in category: {total_items}")
-            browser.close()
+            t2_category = time.perf_counter()
+            logger.info(f"Category: {category}, scraped: {len(data["urls"])}, total: {total_items}, time: {round(t2_category - t1_category, 2)} seconds")
 
         except:
             logger.error(f"Category {category} skipped.", exc_info=True)
+        finally:
+            browser.close()
 
 
 def load_links_to_bucket(logger):
@@ -97,10 +98,23 @@ def load_links_to_bucket(logger):
     return is_empty
 
 
+# main logic (run scraper -> write data to dct -> load to bucket)
 def extract_links(logger):
-    with sync_playwright() as pw:
-        scrape_links(logger, pw)
+    try:
+        t1 = time.perf_counter()
 
-    is_empty = load_links_to_bucket(logger)
-    logger.info("----------------------------------------------------------------")
-    return is_empty
+        with sync_playwright() as pw:
+            scrape_links(logger, pw)
+
+        is_empty = load_links_to_bucket(logger)
+
+        t2 = time.perf_counter()
+        logger.info(f"Finished in {round(t2 - t1, 2)} seconds")
+        logger.info("----------------------------------------------------------------")
+        return is_empty
+    except:
+        logger.error(f"", exc_info=True)
+
+
+if __name__ == "__main__":
+    extract_links()

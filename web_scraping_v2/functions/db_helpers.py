@@ -18,3 +18,10 @@ def get_scraped_products():
         balls = balls_query.scalars().all()
 
     return boots, balls
+
+
+def get_max_product_id():
+    with engine.connect() as conn:
+        max_product_id = conn.execute(text("SELECT COALESCE(MAX(product_id), 0) FROM products"))
+        num = max_product_id.scalar()
+    return num
