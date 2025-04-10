@@ -1,6 +1,4 @@
-lst = []
+lst = ["hello", "world", "lox"]
 
-dct = {"username": "username", "password": "password"}
-
-lst.append(dct)
-print(lst)
+lables = list(map(lambda x: x.strip().upper(), lst))
+print(lables)

@@ -21,12 +21,11 @@ SCHEMA = os.getenv("POSTGRES_SCHEMA")
 engine = create_engine(f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}?options=-csearch_path%3D{SCHEMA}")
 
 
-# # mongo connection
-# mongo_url = os.getenv("MONGO_URL")
-# client = MongoClient(mongo_url)
-# mongo_db = client[os.getenv("MONGO_DB")]
-# mongo_collection = mongo_db["product_features"]
-
+# mongo connection
+mongo_url = os.getenv("MONGO_URL")
+client = MongoClient(mongo_url)
+mongo_db = client[os.getenv("MONGO_DB")]
+mongo_collection = mongo_db["product_details"]
 
 # gcs connection
 bucket_name = os.getenv("BUCKET_NAME")

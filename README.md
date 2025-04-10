@@ -1,4 +1,7 @@
-1. add time for each script and overall time
+features class change
+add comments
+
+
 
 cleaning data script in jupyter notebook
 

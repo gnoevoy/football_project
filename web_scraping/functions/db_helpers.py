@@ -40,17 +40,17 @@ def load_to_db(df, table_name):
 
 
 # Update summary table, track how many records were added from scraping
-def update_summary_table(boots_num, balls_num):
+def update_summary_table(boots, balls):
     with engine.connect() as conn:
         total = conn.execute(text("SELECT COUNT(*) FROM products"))
         total_num = total.scalar()
-        row = {"total": total_num if total_num else 0, "new_boots": boots_num, "new_balls": balls_num}
+        row = {"total": total_num if total_num else 0, "new_boots": boots, "new_balls": balls}
 
         # Insert record and commit changes
         query = text("INSERT INTO summary (total, new_boots, new_balls) VALUES (:total, :new_boots, :new_balls)")
         conn.execute(query, row)
         conn.commit()
-    return boots_num + balls_num
+    return boots + balls
 
 
 # Load list of dictionaries to mongo

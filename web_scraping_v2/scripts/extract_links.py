@@ -109,12 +109,8 @@ def extract_links(logger):
         is_empty = load_links_to_bucket(logger)
 
         t2 = time.perf_counter()
-        logger.info(f"Finished in {round(t2 - t1, 2)} seconds")
+        logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
         logger.info("----------------------------------------------------------------")
         return is_empty
     except:
         logger.error(f"", exc_info=True)
-
-
-if __name__ == "__main__":
-    extract_links()

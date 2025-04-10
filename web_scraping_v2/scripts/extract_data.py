@@ -24,10 +24,10 @@ def scrape_data(logger, playwrigth=Playwright):
     logger.info("EXTRACTING DATA ...")
     # get links from bucket
     links = get_file_from_bucket("web-scraping", "links.json", file_type="json")
+    product_id = get_max_product_id() + 1
 
     for category, data in links.items():
         logger.info(f"Category: {category}")
-        product_id = get_max_product_id() + 1
         category_id = 1 if category == "boots" else 2
         counter = 0
 
@@ -43,7 +43,7 @@ def scrape_data(logger, playwrigth=Playwright):
 
             # loop through links and scrape data
             t1_category = time.perf_counter()
-            for url in data["urls"][:5]:
+            for url in data["urls"][:3]:
                 try:
                     # render product page content
                     page.goto(url)
@@ -64,6 +64,7 @@ def scrape_data(logger, playwrigth=Playwright):
                     flag = all([sizes_flag, labels_flag, related_products_flag, features_flag])
                     message = "Scraped successfully" if flag else "Scraped with issues"
                     logger.info(f"{message}, {url}")
+                    product_id += 1
                     counter += 1
 
                 except:
@@ -100,11 +101,7 @@ def extract_data(logger):
         upload_to_bucket(logger)
 
         t2 = time.perf_counter()
-        logger.info(f"Finished in {round(t2 - t1, 2)} seconds")
+        logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
         logger.info("----------------------------------------------------------------")
     except:
         logger.error(f"", exc_info=True)
-
-
-if __name__ == "__main__":
-    extract_data()
