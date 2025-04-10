@@ -24,11 +24,11 @@ services:
     restart: always
     ports:
       - 5432:5432
-    env_file:
-      - .credentials
     environment:
-      TZ: UTC
-      PGTZ: UTC
+      TZ: Europe/Warsaw
+      PGTZ: Europe/Warsaw
+    env_file:
+      - .docker_env
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U admin" ]
       interval: 10s
@@ -54,7 +54,7 @@ services:
     ports:
       - 27017:27017
     env_file:
-      - .credentials
+      - .docker_env
     volumes:
       - mongo-db:/data/db
 
@@ -65,7 +65,7 @@ services:
     ports:
       - 8081:8081
     env_file:
-      - .credentials
+      - .docker_env
 
 volumes:
   postgres-db:

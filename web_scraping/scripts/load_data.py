@@ -1,56 +1,53 @@
 from pathlib import Path
+import time
 import sys
 
-# Set base path for helper functions
-WEB_SCRAPING_DIR = Path(__file__).parent.parent
-sys.path.append(str(WEB_SCRAPING_DIR))
+# add python path
+ROOT_DIR = Path(__file__).parents[1]
+sys.path.insert(0, str(ROOT_DIR))
 
-# Import helper functions
-from functions.bucket_helpers import open_file_from_gcs, move_image_gcs
-from functions.db_helpers import load_to_db, update_summary_table, load_to_mongo
+# import helper functions
+from functions.bucket_helpers import get_file_from_bucket
+from functions.db_helpers import load_to_postgre, load_to_mongo, update_summary_table
 
 
+# import data
+def get_files(logger):
+    files_dir = "web-scraping/clean"
+    products = get_file_from_bucket(files_dir, "products", file_type="csv")
+    sizes = get_file_from_bucket(files_dir, "sizes", file_type="csv")
+    details = get_file_from_bucket(files_dir, "details.json", file_type="json")
+    logger.info("Files were successfully downloaded from the bucket.")
+    return products, sizes, details
+
+
+def load_data_to_db(products, sizes, details, logger):
+    load_to_postgre(products, "products")
+    load_to_postgre(sizes, "sizes")
+
+    products_num = len(products)
+    mongo_num = load_to_mongo(details)
+    logger.info(f"Data was successfully loaded, postgres: {products_num}, mongo: {mongo_num}")
+
+    # values for summary table record
+    boots = len(products.query("category_id == 1"))
+    balls = len(products.query("category_id == 2"))
+    return boots, balls
+
+
+# logic: import files -> load to db's -> update summary table
 def load_data(logger):
-    clean_files_dir = "web-scraping/clean"
-
     try:
-        # Import files
-        products = open_file_from_gcs(clean_files_dir, "products.csv")
-        colors = open_file_from_gcs(clean_files_dir, "colors.csv")
-        sizes = open_file_from_gcs(clean_files_dir, "sizes.csv")
-        labels = open_file_from_gcs(clean_files_dir, "labels.csv")
-        images = open_file_from_gcs(clean_files_dir, "images.csv")
-        features = open_file_from_gcs(clean_files_dir, "features.json", csv=False)
+        logger.info("LOADING DATA STARTED ...")
+        t1 = time.perf_counter()
 
-        logger.info("DATA LOADING STARTED")
+        products, sizes, details = get_files(logger)
+        boots, balls = load_data_to_db(products, sizes, details, logger)
+        update_summary_table(boots, balls)
+        logger.info(f"Summary table successfully updated, boots: {boots}, balls {balls}")
 
-        # Load to postgres db
-        load_to_db(products, "products")
-        load_to_db(colors, "colors")
-        load_to_db(labels, "labels")
-        load_to_db(sizes, "sizes")
-        load_to_db(images, "images")
-        logger.info("Data successfully loaded to db")
-
-        # Update summary table
-        boots_num = len(products.query("category_id == 1"))
-        balls_num = len(products.query("category_id == 2"))
-        summary_num = update_summary_table(boots_num, balls_num)
-        logger.info(f"Summary table successfully updated, added {summary_num} new products")
-
-        # Load product features to mongo
-        mongo_num = load_to_mongo(features)
-        logger.info(f"Data successfully loaded to mongo, added {mongo_num} records")
-
-        # Load images to storage
-        images_num = move_image_gcs()
-        logger.info(f"Images successfully moved, {images_num} images")
-        logger.info("")
-
-    except Exception:
-        logger.error(f"Unexpected error", exc_info=True)
-        logger.info("")
-
-
-if __name__ == "__main__":
-    load_data()
+        t2 = time.perf_counter()
+        logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
+        logger.info("----------------------------------------------------------------")
+    except:
+        logger.error(f"", exc_info=True)

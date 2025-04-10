@@ -2,30 +2,26 @@ from sqlalchemy import text
 from pathlib import Path
 import sys
 
-# Set base path for helper functions
-ROOT_DIR = Path(__file__).parent.parent.parent
-sys.path.append(str(ROOT_DIR))
+# add python path
+ROOT_DIR = Path(__file__).parents[1]
+sys.path.insert(0, str(ROOT_DIR))
 
-# import db connections
+# import connections
 from utils.connections import engine, mongo_collection
 
 
-# Retrieve already scraped products ids
+# helper for exrtract_links.py
 def get_scraped_products():
     with engine.connect() as conn:
-        products = conn.execute(text("SELECT category_id, scraped_id FROM products"))
-        dct = products.mappings().all()
+        boots_query = conn.execute(text("SELECT scraped_id FROM products WHERE category_id = 1"))
+        balls_query = conn.execute(text("SELECT scraped_id FROM products WHERE category_id = 2"))
+        boots = boots_query.scalars().all()
+        balls = balls_query.scalars().all()
 
-        res = {"boots": [], "balls": []}
-        for row in dct:
-            if row["category_id"] == 1:
-                res["boots"].append(row["scraped_id"])
-            else:
-                res["balls"].append(row["scraped_id"])
-        return res
+    return boots, balls
 
 
-# Get the highest product id from db
+# helper for extract_data.py
 def get_max_product_id():
     with engine.connect() as conn:
         max_product_id = conn.execute(text("SELECT COALESCE(MAX(product_id), 0) FROM products"))
@@ -33,10 +29,15 @@ def get_max_product_id():
     return num
 
 
-# Load dataframe to db if there're records in dataframe
-def load_to_db(df, table_name):
-    if len(df) > 0:
-        df.to_sql(table_name, engine, if_exists="append", index=False)
+# helper for transform_data.py
+def load_to_postgre(df, table_name):
+    df.to_sql(table_name, engine, if_exists="append", index=False)
+
+
+# helper for transform_data.py
+def load_to_mongo(lst):
+    mongo_collection.insert_many(lst)
+    return len(lst)
 
 
 # Update summary table, track how many records were added from scraping
@@ -50,28 +51,3 @@ def update_summary_table(boots, balls):
         query = text("INSERT INTO summary (total, new_boots, new_balls) VALUES (:total, :new_boots, :new_balls)")
         conn.execute(query, row)
         conn.commit()
-    return boots + balls
-
-
-# Load list of dictionaries to mongo
-def load_to_mongo(lst):
-    mongo_collection.insert_many(lst)
-    return len(lst)
-
-
-# Get the highest order id from db
-def order_generetor_queries():
-    with engine.connect() as conn:
-        max_order_id = conn.execute(text("SELECT COALESCE(MAX(order_id), 0) FROM orders")).scalar()
-        product_query = conn.execute(text("SELECT product_id, price, old_price FROM products")).fetchall()
-        products = {row.product_id: {"price": row.price, "old_price": row.old_price} for row in product_query}
-
-        product_sizes = conn.execute(text("SELECT product_id, size FROM sizes WHERE in_stock IS TRUE")).mappings().all()
-        sizes = {}
-        for row in product_sizes:
-            if row["product_id"] not in sizes:
-                sizes[row["product_id"]] = [row["size"]]
-            else:
-                sizes[row["product_id"]].append(row["size"])
-
-    return int(max_order_id), products, sizes

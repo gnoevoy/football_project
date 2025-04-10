@@ -4,7 +4,6 @@ import pandas as pd
 import time
 import sys
 
-
 # add python path
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
@@ -43,17 +42,17 @@ def scrape_data(logger, playwrigth=Playwright):
 
             # loop through links and scrape data
             t1_category = time.perf_counter()
-            for url in data["urls"][:3]:
+            for url in data["urls"]:
                 try:
                     # render product page content
                     page.goto(url)
                     content = render_product_page(page)
 
-                    # scrape core data for product, if successful try to scrape additional data, else skip item
-                    # flags needed to check if item was scraped fully or not
+                    # scrape core data for product, if successful try to get additional data, else skip item
+                    # flags needed to check if an item was scraped fully or not
                     product = get_product(content, url, product_id, category_id)
                     product_sizes, sizes_flag = get_sizes(content, url, product_id, logger)
-                    product_details, labels_flag, related_products_flag, features_flag = get_details(content, url, product_id, logger)
+                    product_details, labels_flag, related_products_flag, features_flag, related_products_message = get_details(content, url, product_id, logger)
 
                     # add values to lists
                     products.append(product)
@@ -63,7 +62,10 @@ def scrape_data(logger, playwrigth=Playwright):
                     # summary log about a product
                     flag = all([sizes_flag, labels_flag, related_products_flag, features_flag])
                     message = "Scraped successfully" if flag else "Scraped with issues"
-                    logger.info(f"{message}, {url}")
+                    if related_products_message:
+                        logger.info(f"{message}, {related_products_message} - {url}")
+                    else:
+                        logger.info(f"{message} - {url}")
                     product_id += 1
                     counter += 1
 
@@ -90,7 +92,7 @@ def upload_to_bucket(logger):
     logger.info("Files were successfully uploaded to bucket")
 
 
-# main logic (scrape product pages -> write data to lists -> load to bucket)
+# logic: scrape product pages -> write data to lists -> load to bucket
 def extract_data(logger):
     try:
         t1 = time.perf_counter()

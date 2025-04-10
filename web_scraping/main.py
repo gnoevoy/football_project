@@ -1,35 +1,34 @@
-from datetime import datetime
 from pathlib import Path
-import sys
+import time
 
-PROJECT_DIR = Path(__file__).parent.parent
-sys.path.append(str(PROJECT_DIR))
-
-# Import scrips
+# import scripts
+from scripts.extract_links import extract_links
+from scripts.extract_data import extract_data
+from scripts.transform_data import transform_data
+from scripts.load_data import load_data
 from utils.logger import setup_logger
-from web_scraping.scripts.get_links import scrape_links
-from web_scraping.scripts.get_data import scrape_data
-from web_scraping.scripts.clean_data import clean_data
-from web_scraping.scripts.load_data import load_data
 
-# Set up logger for script
-LOGS_DIR = PROJECT_DIR / "logs" / "web_scraping"
-timestamp = datetime.now().strftime("%Y-%m-%d_%H:%M")
-logger = setup_logger(LOGS_DIR / f"scraping_{timestamp}.log")
+# create log file
+LOGS_DIR = Path(__file__).parent / "logs"
+logger = setup_logger(LOGS_DIR, "web_scraping")
 
 
-try:
-    # Main logic
-    is_empty = scrape_links(logger)
-    if is_empty:
-        logger.info("No new records in web app")
-    else:
-        scrape_data(logger)
-        clean_data(logger)
+def main():
+    t1 = time.perf_counter()
+    is_empty = extract_links(logger)
+
+    # check if there are new products in the website
+    if not is_empty:
+        extract_data(logger)
+        transform_data(logger)
         load_data(logger)
+    else:
+        logger.info("No new products on the website")
+        logger.info("----------------------------------------------------------------")
 
-    logger.info("-------------------------------------------------------")
+    t2 = time.perf_counter()
+    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
 
-except Exception:
-    logger.error(f"Unexpected error", exc_info=True)
-    logger.info("-------------------------------------------------------")
+
+if __name__ == "__main__":
+    main()

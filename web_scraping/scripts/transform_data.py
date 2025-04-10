@@ -21,7 +21,7 @@ def get_files(logger):
     return products, sizes, details
 
 
-# clean and transform products table (iterative process with jypyter notebook)
+# clean and transform products table (iterative process with jupyter notebook)
 def transform_products(products):
     products["price"] = products["price"].str.split("\n", expand=True)[1].str.strip().str[:-2].str.replace(",", ".").astype(float)
     products["title"] = products["title"].str.split("\n", expand=True)[0].str.strip().str.title()
@@ -38,6 +38,7 @@ def transform_sizes(sizes):
     return sizes
 
 
+# clean json file and store data in a new list
 def transform_details(dct):
     details = []
 
@@ -48,7 +49,10 @@ def transform_details(dct):
 
         features = {}
         for key, value in product["features"].items():
-            new_key = key.strip().lower().replace(" ", "_").replace(":", "").replace("'", "")
+            if key == "Class:":
+                new_key = "type_of_class"
+            else:
+                new_key = key.strip().lower().replace(" ", "_").replace(":", "").replace("'", "")
             new_value = value.strip().title()
             features[new_key] = new_value
 
@@ -66,7 +70,7 @@ def load_files(products, sizes, details, logger):
     logger.info("Files were successfully uploaded to bucket")
 
 
-# main logic (import files -> transform -> load to bucket)
+# logic: import files -> transform them -> load to bucket
 def transform_data(logger):
     try:
         logger.info("DATA TRANSFORMATION STARTED ...")

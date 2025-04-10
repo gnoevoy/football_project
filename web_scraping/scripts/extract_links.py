@@ -6,7 +6,6 @@ import time
 import sys
 import os
 
-
 # add python path and load variables
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
@@ -31,10 +30,10 @@ dct = {
 
 
 # run scraper
-def scrape_links(logger, playwrigth=Playwright):
+def scrape_links(logger, playwright=Playwright):
     logger.info("EXTRACTING LINKS ...")
 
-    # load product from DB to avoid scraping already existing products
+    # load products from DB to avoid scraping already existing records
     scraped_boots, scraped_balls = get_scraped_products()
 
     for category, data in dct.items():
@@ -45,7 +44,7 @@ def scrape_links(logger, playwrigth=Playwright):
             # open catalog, handle cookies and retrieve num of products in category
             page_num = 1
             url = f"{data["base_url"]}&page={page_num}"
-            page, browser = open_catalog(playwrigth, url)
+            page, browser = open_catalog(playwright, url)
             handle_cookies(page)
             total_items = get_total_items(page)
 
@@ -98,7 +97,7 @@ def load_links_to_bucket(logger):
     return is_empty
 
 
-# main logic (run scraper -> write data to dct -> load to bucket)
+# logic: run scraper -> write data to dct -> load to bucket
 def extract_links(logger):
     try:
         t1 = time.perf_counter()

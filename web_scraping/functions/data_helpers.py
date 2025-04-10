@@ -15,7 +15,7 @@ def render_product_page(page):
     return content
 
 
-# scrape core data for item
+# scrape core data for item, no error handling (this data essential)
 def get_product(content, url, product_id, category_id):
     title = content.find("h1", class_="product-card__title").text
     price = content.find(
@@ -91,6 +91,7 @@ def get_related_products(content, url, logger):
     product_colors = []
     related_products = content.find("ul", class_="model-group-products__wrap model-group-products__wrap--expandable")
     flag = True
+    message = None
 
     if related_products:
         for color in related_products.find_all("a", class_="model-group-products__link"):
@@ -101,9 +102,9 @@ def get_related_products(content, url, logger):
                 logger.error(f"Failed to extract a color, {url}", exc_info=True)
                 flag = False
     else:
-        logger.warning(f"Item doesnt have related products, {url}", exc_info=True)
+        message = "no related products"
 
-    return product_colors, flag
+    return product_colors, flag, message
 
 
 def get_features(content, url, logger):
@@ -129,8 +130,8 @@ def get_features(content, url, logger):
 # compose different data into one dct for storing in a mongo db
 def get_details(content, url, product_id, logger):
     labels, labels_flag = get_labels(content, url, logger)
-    related_products, related_products_flag = get_related_products(content, url, logger)
+    related_products, related_products_flag, message = get_related_products(content, url, logger)
     features, features_flag = get_features(content, url, logger)
 
     details = {"product_id": product_id, "labels": labels, "related_products": related_products, "features": features}
-    return details, labels_flag, related_products_flag, features_flag
+    return details, labels_flag, related_products_flag, features_flag, message

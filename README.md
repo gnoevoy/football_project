@@ -1,9 +1,4 @@
-features class change
-add comments
+3. renaming for project and removing old fodler
 
 
-
-cleaning data script in jupyter notebook
-
-* docker compose add simple variables for services
-* parrallel executin ?????
+4. docker container for an app
