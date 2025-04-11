@@ -2,3 +2,4 @@
 
 
 4. docker container for an app
+* in docker check if .env file exists becasue we load variables via docker compose

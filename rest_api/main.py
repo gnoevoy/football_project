@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from helpers.functions import get_db, display_products, display_orders
-from helpers.auth import get_current_active_user, generate_access_token
-from helpers.auth import Token, User
+from functions.queries import display_products, display_orders
+from functions.auth import get_current_active_user, generate_access_token
+from functions.auth import Token, User
 
 
 app = FastAPI()
@@ -17,17 +17,17 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 # Route to retrieve all orders
 @app.get("/orders/")
-def get_orders(db=Depends(get_db), curent_user: User = Depends(get_current_active_user)):
-    data = display_orders(db)
+def get_orders():
+    data = display_orders()
     return data
 
 
 # Route to retrieve products by category
 @app.get("/{category}/")
-def get_products(category, db=Depends(get_db), current_user: User = Depends(get_current_active_user)):
+def get_products(category, current_user: User = Depends(get_current_active_user)):
     categories = ["boots", "balls"]
     if category not in categories:
         raise HTTPException(status_code=404, detail="Category not found")
 
-    data = display_products(db, category)
+    data = display_products(category)
     return data

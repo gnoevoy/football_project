@@ -1,9 +1,12 @@
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from pymongo import MongoClient
+from pathlib import Path
 import os
 
-load_dotenv(".env")
+# load variables
+ENV_FILE = Path(__file__).parents[1] / ".env"
+load_dotenv(ENV_FILE)
 
 # postgres connection
 USER = os.getenv("POSTGRES_USER")
@@ -18,4 +21,4 @@ engine = create_engine(f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}?
 mongo_url = os.getenv("MONGO_URL")
 client = MongoClient(mongo_url)
 mongo_db = client[os.getenv("MONGO_DB")]
-mongo_collection = mongo_db["product_features"]
+mongo_collection = mongo_db["product_details"]
