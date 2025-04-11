@@ -1,5 +1,14 @@
-env
-.env
-.credentials
+# packages
+env/
+requirements.txt
+
+# python files
 __pycache__/
+example.py
+
+# logs
 logs/
+
+# env variables
+.env
+.docker_env
