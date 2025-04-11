@@ -1,4 +1,10 @@
-lst = ["hello", "world", "lox"]
+lst = ["41 2/3", "42", "40"]
+x = ["41", "42"]
 
-lables = list(map(lambda x: x.strip().upper(), lst))
-print(lables)
+a = "50"
+b = "5"
+
+if a in b:
+    print("yes")
+else:
+    print("no")
