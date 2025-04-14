@@ -3,7 +3,7 @@ import logging
 
 
 def setup_logger(dir, name):
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    timestamp = datetime.now().strftime("%m-%d_%H:%M:%S")
     file_name = f"{dir}/{name}_{timestamp}.log"
 
     logging.basicConfig(

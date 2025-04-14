@@ -10,7 +10,7 @@ from utils.logger import setup_logger
 
 # create log file
 LOGS_DIR = Path(__file__).parent / "logs"
-logger = setup_logger(LOGS_DIR, "web_scraping")
+logger = setup_logger(LOGS_DIR, "logs")
 
 
 def main():
