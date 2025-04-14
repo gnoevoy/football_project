@@ -1,6 +1,6 @@
 services:
 
-  # rest api
+  # REST API
   fastapi:
     build:
       context: ./rest_api

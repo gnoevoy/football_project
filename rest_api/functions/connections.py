@@ -6,7 +6,8 @@ import os
 
 # load variables
 ENV_FILE = Path(__file__).parents[1] / ".env"
-load_dotenv(ENV_FILE)
+if ENV_FILE.exists():
+    load_dotenv(ENV_FILE)
 
 # postgres connection
 USER = os.getenv("POSTGRES_USER")
