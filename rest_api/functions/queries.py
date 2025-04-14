@@ -1,31 +1,32 @@
-from .connections import engine, mongo_collection
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import Session
 from collections import defaultdict
+from sqlalchemy import text
+from pathlib import Path
+import sys
 
-# map existing database tables to ORM classes
-Base = automap_base()
-Base.prepare(autoload_with=engine)
-Products = Base.classes.products
-Categories = Base.classes.categories
-Sizes = Base.classes.sizes
-Orders = Base.classes.orders
-OrderDetails = Base.classes.order_details
+# add python path
+ROOT_DIR = Path(__file__).parents[1]
+sys.path.insert(0, str(ROOT_DIR))
+
+# import connections
+from functions.connections import engine, mongo_collection
 
 
-# helper to creates dctionary with sizes
-def get_sizes_dct(sizes):
+# get product sizes in specific format
+def get_sizes(db, product_ids):
+    sizes_query = db.execute(text("SELECT * FROM sizes WHERE product_id IN :product_ids"), {"product_ids": tuple(product_ids)})
+    sizes = sizes_query.mappings().all()
     dct = defaultdict(lambda: {"in_stock": [], "out_of_stock": []})
+
     for size in sizes:
-        size_data = {"size": size.size, "in_stock": size.in_stock}
-        if size.in_stock:
-            dct[size.product_id]["in_stock"].append(size_data["size"])
+        product_id = size["product_id"]
+        if size["in_stock"]:
+            dct[product_id]["in_stock"].append(size["size"])
         else:
-            dct[size.product_id]["out_of_stock"].append(size_data["size"])
+            dct[product_id]["out_of_stock"].append(size["size"])
     return dct
 
 
-# helper to query mongodb and get product details
+# load product details from monogdb
 def get_product_details(product_id):
     details = mongo_collection.find_one({"_id": product_id})
     details.pop("_id")
@@ -33,75 +34,63 @@ def get_product_details(product_id):
     return details
 
 
-def get_product_data(product, sizes_dct):
-    product_data = product.__dict__
-    product_id = product_data["product_id"]
-
-    # add sizes and product details to record
-    product_data["sizes"] = sizes_dct[product_id]
-    details_dct = get_product_details(product_id)
-    product_data.update(details_dct)
-
-    # remove unnecessary data
-    for key in ["_sa_instance_state", "scraped_id", "url", "category_id"]:
-        product_data.pop(key)
-
-    return product_data
-
-
 def display_products(category_name):
     dct = {"category_name": category_name, "products": []}
     category_id = 1 if category_name == "boots" else 2
 
-    with Session(engine) as db:
+    with engine.connect() as db:
         # get category products
-        products = db.query(Products).filter(Products.category_id == category_id)
-        product_ids = [product.product_id for product in products.all()]
+        products_query = db.execute(text("SELECT * FROM products WHERE category_id = :category_id"), {"category_id": category_id})
+        products = products_query.mappings().all()
+        product_ids = [product["product_id"] for product in products]
 
         # get sizes
-        sizes = db.query(Sizes).filter(Sizes.product_id.in_(product_ids))
-        sizes_dct = get_sizes_dct(sizes)
+        sizes = get_sizes(db, product_ids)
 
-    # loop over products and add core info, sizes and details
+    # compose product records with core info, sizes and details
     for product in products:
-        product_data = get_product_data(product, sizes_dct)
-        dct["products"].append(product_data)
+        row = {**product}
+        row["sizes"] = sizes[row["product_id"]]
+        details = get_product_details(row["product_id"])
+        row["labels"] = details["labels"]
+        row["related_products"] = details["related_products"]
+        row["features"] = details["features"]
+
+        # remove unnecessary data
+        for key in ["scraped_id", "url", "category_id"]:
+            row.pop(key)
+        dct["products"].append(row)
 
     return dct
 
 
-# helper to create dictionary with order details
-def get_order_details_dct(order_details):
+# get order details in comfortable format to append to orders
+def get_order_details_dct(db):
+    order_details_query = db.execute(text("SELECT * FROM order_details"))
+    order_details = order_details_query.mappings().all()
     dct = defaultdict(list)
 
-    for detail in order_details:
-        data = detail.__dict__
-        order_id = data["order_id"]
-        for key in ["_sa_instance_state", "order_id", "order_detail_id"]:
-            data.pop(key)
-        dct[order_id].append(data)
-
+    for order_detail in order_details:
+        row = {**order_detail}
+        order_id = row["order_id"]
+        row.pop("order_id")
+        dct[order_id].append(row)
     return dct
 
 
 def display_orders():
+    with engine.connect() as db:
+        # access orders and order details tables
+        orders_query = db.execute(text("SELECT * FROM orders"))
+        orders = orders_query.mappings().all()
+        order_details = get_order_details_dct(db)
+
+    # compose order records with order details
     lst = []
-
-    with Session(engine) as db:
-        # get orders with details
-        orders = db.query(Orders)
-        order_details = db.query(OrderDetails)
-        details = get_order_details_dct(order_details)
-
-    # loop over orders and add data
     for order in orders:
-        order_data = order.__dict__
-        order_id = order_data["order_id"]
-        order_data["order_details"] = details[order_id]
-
-        # remove unnecessary data
-        for key in ["_sa_instance_state", "created_at"]:
-            order_data.pop(key)
-        lst.append(order_data)
+        row = {**order}
+        row["order_details"] = order_details[row["order_id"]]
+        row.pop("created_at")
+        lst.append(row)
 
     return lst

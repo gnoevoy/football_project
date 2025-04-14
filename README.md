@@ -1,5 +1,9 @@
-3. renaming for project and removing old fodler
+PLAN:
+1. rest api: docker path problems
+2. rest api: code structure and queries
+--------------
+3. pipeline: get + extract code
+4. learn how to work with bigquery
+--------------
 
-
-4. docker container for an app
-* in docker check if .env file exists becasue we load variables via docker compose
+*** schedule 3 tasks with docker and python module 

@@ -5,8 +5,8 @@ import pandas as pd
 import json
 import os
 
-env_file = Path(__file__).parents[1] / ".env"
-load_dotenv(env_file)
+ENV_FILE = Path(__file__).parents[1] / ".env"
+load_dotenv(ENV_FILE)
 
 # connection
 bucket_name = os.getenv("BUCKET_NAME")
