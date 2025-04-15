@@ -16,7 +16,7 @@ def main(logger):
 
     # main logic
     # extract_data(logger)
-    # transform_data(logger)
+    transform_data(logger)
 
     t2 = time.perf_counter()
     logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")

@@ -1,0 +1,15 @@
+[
+    {
+        "username": "john",
+        "features": [
+            "running",
+            "cycling"
+        ]
+    },
+    {
+        "username": "alice",
+        "features": [
+            "reading"
+        ]
+    }
+]

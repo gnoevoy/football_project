@@ -31,8 +31,8 @@ def get_products(logger):
         products = pd.concat([products, df], ignore_index=True)
 
     # clean products table
-    df["category_id"] = np.where(df["category_name"] == "boots", 1, 2)
-    df["description"] = df["description"].apply(lambda value: value if value else np.nan)
+    products["category_id"] = np.where(products["category_name"] == "boots", 1, 2)
+    products["description"] = products["description"].apply(lambda value: value if value else np.nan)
     logger.info("Products table successfully created and processed")
     return products
 
