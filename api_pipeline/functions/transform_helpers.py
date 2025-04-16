@@ -1,36 +1,111 @@
+from dotenv import load_dotenv
+from pathlib import Path
 import pandas as pd
 import numpy as np
-from pathlib import Path
 import sys
-
+import os
 
 # add path path
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
+load_dotenv(ROOT_DIR / ".env")
 
 # import helper functions
-from functions.gcs_utils import get_file_from_bucket
+from functions.utils import get_file_from_bucket, bigquery_client
 
 
-# featch category table
-def get_category_table(raw_files_dir, category):
-    data = get_file_from_bucket(raw_files_dir, f"{category}.json", "json")
-    df = pd.DataFrame(data["products"])
-    df["category_name"] = data["category_name"]
-    return df
+# retrieve product ids and order ids from BigQuery
+def get_products_and_orders_ids():
+    BIGQUERY_SCHEMA = os.getenv("WAREHOUSE_SCHEMA")
+    products_query = bigquery_client.query(f"SELECT product_id FROM {BIGQUERY_SCHEMA}.products").result()
+    orders_query = bigquery_client.query(f"SELECT order_id FROM {BIGQUERY_SCHEMA}.orders").result()
+    products = [product.product_id for product in products_query]
+    orders = [order.order_id for order in orders_query]
+    return products, orders
 
 
-def get_products_with_details():
-    categories = ["boots", "balls"]
-    products = pd.DataFrame()
+# get products data in one table
+def get_products_with_details(product_ids):
+    df = pd.DataFrame()
 
-    # construct one table from multiple categories
-    for category in categories:
-        df = get_category_table("api-pipeline/raw", category)
-        df["category_id"] = np.where(category == "boots", 1, 2)
-        products = pd.concat([products, df], ignore_index=True)
+    for category in ["boots", "balls"]:
+        data = get_file_from_bucket("api-pipeline/raw", f"{category}.json", "json")
+        category_id = 1 if category == "boots" else 2
+        category_df = pd.json_normalize(data["products"], errors="ignore")
+        category_df["category_name"] = data["category_name"]
+        category_df["category_id"] = category_id
+        df = pd.concat([df, category_df], ignore_index=True)
+
+    # filter out table to remove already existed products in BigQuery
+    df = df[~df["product_id"].isin(product_ids)]
+    if len(df) > 0:
+        is_empty = False
+        return df, is_empty
+    else:
+        is_empty = True
+        return df, is_empty
+
+
+### Normalize products data
+
+
+def get_products(df):
+    cols = ["product_id", "created_at", "title", "price", "old_price", "description", "avg_vote_rate", "num_votes", "category_id"]
+    products = df[cols]
+    products["description"] = products["description"].replace({None: np.nan})
+    products["num_votes"] = products["num_votes"].astype("Int64")
     return products
 
 
-x = get_products_with_details()
-x.to_csv("example_data.csv", index=False)
+def get_categories(df):
+    categories = df[["category_id", "category_name"]].drop_duplicates()
+    return categories
+
+
+def get_labels(df):
+    labels = df[["product_id", "labels"]].explode("labels").dropna().rename(columns={"labels": "label"})
+    labels["label"] = labels["label"].astype(str)
+    return labels
+
+
+def get_related_products(df):
+    related_products = df[["product_id", "related_products"]].explode("related_products").dropna()
+    related_products.rename(columns={"related_products": "related_product_id"}, inplace=True)
+    related_products["related_product_id"] = related_products["related_product_id"].astype(int)
+    return related_products
+
+
+def get_sizes(df):
+    sizes = pd.DataFrame()
+    for col in ["sizes.in_stock", "sizes.out_of_stock"]:
+        exploded = df[["product_id", col]].explode(col).dropna().rename(columns={col: "size"})
+        exploded["in_stock"] = True if col == "sizes.in_stock" else False
+        sizes = pd.concat([sizes, exploded], ignore_index=True)
+    sizes["size"] = sizes["size"].astype(str)
+    return sizes
+
+
+def get_features(df):
+    cols = [col for col in df.columns if "features." in col]
+    features = df[["product_id", *cols]]
+    features = features.melt(id_vars=["product_id"], value_vars=cols, var_name="feature", value_name="value").dropna()
+    features["feature"] = features["feature"].str.split(".").str[1]
+    return features
+
+
+# get orders and order details tables
+def get_orders_and_details(order_ids):
+    data = get_file_from_bucket("api-pipeline/raw", "orders.json", "json")
+    orders_lst, details_lst = [], []
+
+    for order in data:
+        # filter out data to remove already existed orders in BigQuery
+        if order["order_id"] not in order_ids:
+            order_id = order["order_id"]
+            details = [{"order_id": order_id, **detail} for detail in order["order_details"]]
+            details_lst.extend(details)
+            row = {**order}
+            row.pop("order_details")
+            orders_lst.append(row)
+
+    return pd.DataFrame(orders_lst), pd.DataFrame(details_lst)

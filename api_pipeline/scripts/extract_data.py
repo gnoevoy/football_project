@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT_DIR))
 load_dotenv(ROOT_DIR / ".env")
 
 # import helper functions
-from functions.gcs_utils import load_file_to_bucket
+from functions.utils import load_file_to_bucket
 
 API_BASE_URL = os.getenv("API_BASE_URL")
 api_endpoints = ["boots", "balls", "orders"]
@@ -39,14 +39,14 @@ def get_data(token, endpoint):
 def extract_data(logger):
     try:
         t1 = time.perf_counter()
-        logger.info("EXTRACTING DATA FROM API...")
+        logger.info("EXTRACTING DATA FROM API ...")
         token = get_token()
         raw_files_dir = "api-pipeline/raw"
 
         for endpoint in api_endpoints:
             data = get_data(token, endpoint)
             load_file_to_bucket(data, raw_files_dir, f"{endpoint}.json", file_type="json")
-            logger.info(f"{endpoint.title()} successfully loaded to GCS bucket")
+            logger.info(f"{endpoint.title()} successfully loaded to bucket")
 
         t2 = time.perf_counter()
         logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
