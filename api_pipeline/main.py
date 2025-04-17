@@ -26,12 +26,3 @@ def main(logger):
 
 if __name__ == "__main__":
     main(logger)
-
-# bigquery code
-# DELETE FROM football_project.features WHERE true;
-# DELETE FROM football_project.labels WHERE true;
-# DELETE FROM football_project.order_details WHERE true;
-# DELETE FROM football_project.orders WHERE true;
-# DELETE FROM football_project.products WHERE true;
-# DELETE FROM football_project.related_products WHERE true;
-# DELETE FROM football_project.sizes WHERE true;

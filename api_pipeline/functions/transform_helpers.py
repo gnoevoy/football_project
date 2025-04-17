@@ -36,17 +36,12 @@ def get_products_with_details(product_ids):
         category_df["category_id"] = category_id
         df = pd.concat([df, category_df], ignore_index=True)
 
-    # filter out table to remove already existed products in BigQuery
+    # filter out table to get new products
     df = df[~df["product_id"].isin(product_ids)]
-    if len(df) > 0:
-        is_empty = False
-        return df, is_empty
-    else:
-        is_empty = True
-        return df, is_empty
+    return df
 
 
-### Normalize products data
+### Normalize products data (create star schema, 5 tables + categories)
 
 
 def get_products(df):
@@ -55,11 +50,6 @@ def get_products(df):
     products["description"] = products["description"].replace({None: np.nan})
     products["num_votes"] = products["num_votes"].astype("Int64")
     return products
-
-
-def get_categories(df):
-    categories = df[["category_id", "category_name"]].drop_duplicates()
-    return categories
 
 
 def get_labels(df):

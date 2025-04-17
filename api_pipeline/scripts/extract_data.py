@@ -17,6 +17,7 @@ API_BASE_URL = os.getenv("API_BASE_URL")
 api_endpoints = ["boots", "balls", "orders"]
 
 
+# get token for auth
 def get_token():
     metadata = {"username": os.getenv("API_USER_NAME"), "password": os.getenv("API_USER_PASSWORD")}
     url = f"{API_BASE_URL}/token"
@@ -35,7 +36,7 @@ def get_data(token, endpoint):
         return data
 
 
-# logic: get token for auth -> get data from endpoints -> load to GCS bucket
+# get token -> extract data from endpoints -> write files to bucket
 def extract_data(logger):
     try:
         t1 = time.perf_counter()
@@ -46,7 +47,7 @@ def extract_data(logger):
         for endpoint in api_endpoints:
             data = get_data(token, endpoint)
             load_file_to_bucket(data, raw_files_dir, f"{endpoint}.json", file_type="json")
-            logger.info(f"{endpoint.title()} successfully loaded to bucket")
+            logger.info(f"{endpoint.title()} successfully extracted and loaded to bucket")
 
         t2 = time.perf_counter()
         logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
