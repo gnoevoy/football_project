@@ -27,7 +27,7 @@ def main():
         logger.info("No new products on the website")
         logger.info("----------------------------------------------------------------")
 
-    # Measure execution time of entire pipeline
+    # Log execution time
     t2 = time.perf_counter()
     logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
 

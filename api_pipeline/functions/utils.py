@@ -9,14 +9,14 @@ import os
 ENV_FILE = Path(__file__).parents[1] / ".env"
 load_dotenv(ENV_FILE)
 
-# connections
+# Bucket and warehouse connections
 bucket_name = os.getenv("BUCKET_NAME")
 storage_client = storage.Client()
 bucket = storage_client.bucket(bucket_name)
 bigquery_client = bigquery.Client()
 
 
-# load csv of json file to storage
+# Load csv of json file to storage
 def load_file_to_bucket(data, dir, file_name, file_type="json"):
     destination = f"{dir}/{file_name}"
     blob = bucket.blob(destination)
@@ -28,7 +28,7 @@ def load_file_to_bucket(data, dir, file_name, file_type="json"):
         blob.upload_from_string(content, content_type="application/json")
 
 
-# open csv or json file
+# Open csv or json file
 def get_file_from_bucket(dir, file_name, file_type="json"):
     if file_type == "csv":
         path = f"gs://{bucket_name}/{dir}/{file_name}"
@@ -41,7 +41,7 @@ def get_file_from_bucket(dir, file_name, file_type="json"):
         return data
 
 
-# load csv file from bucket to bigquery
+# Load csv file from bucket to bigquery
 def load_table_to_bigquery(gcs_url, table_id):
     job_config = bigquery.LoadJobConfig(skip_leading_rows=1, source_format=bigquery.SourceFormat.CSV)
     load_job = bigquery_client.load_table_from_uri(gcs_url, table_id, job_config=job_config)

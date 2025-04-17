@@ -5,16 +5,16 @@ import numpy as np
 import sys
 import os
 
-# add path path
+# Add path path
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 load_dotenv(ROOT_DIR / ".env")
 
-# import helper functions
+# Import helper functions
 from functions.utils import get_file_from_bucket, bigquery_client
 
 
-# retrieve product ids and order ids from BigQuery
+# Retrieve product and order IDs from BigQuery
 def get_products_and_orders_ids():
     BIGQUERY_SCHEMA = os.getenv("WAREHOUSE_SCHEMA")
     products_query = bigquery_client.query(f"SELECT product_id FROM {BIGQUERY_SCHEMA}.products").result()
@@ -24,7 +24,7 @@ def get_products_and_orders_ids():
     return products, orders
 
 
-# get products data in one table
+# Get products data in one dataframe
 def get_products_with_details(product_ids):
     df = pd.DataFrame()
 
@@ -36,12 +36,12 @@ def get_products_with_details(product_ids):
         category_df["category_id"] = category_id
         df = pd.concat([df, category_df], ignore_index=True)
 
-    # filter out table to get new products
+    # filter out table to get only new products
     df = df[~df["product_id"].isin(product_ids)]
     return df
 
 
-### Normalize products data (create star schema, 5 tables + categories)
+### Normalize products data (create star schema, 5 tables)
 
 
 def get_products(df):
@@ -83,13 +83,13 @@ def get_features(df):
     return features
 
 
-# get orders and order details tables
+# Return orders and order details tables
 def get_orders_and_details(order_ids):
     data = get_file_from_bucket("api-pipeline/raw", "orders.json", "json")
     orders_lst, details_lst = [], []
 
     for order in data:
-        # filter out data to remove already existed orders in BigQuery
+        # Filter out orders to get only new orders
         if order["order_id"] not in order_ids:
             order_id = order["order_id"]
             details = [{"order_id": order_id, **detail} for detail in order["order_details"]]

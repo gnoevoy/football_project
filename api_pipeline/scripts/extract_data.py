@@ -5,19 +5,19 @@ import time
 import sys
 import os
 
-# add path path and load variables
+# Add path path and load variables
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 load_dotenv(ROOT_DIR / ".env")
 
-# import helper functions
+# Import helper functions
 from functions.utils import load_file_to_bucket
 
 API_BASE_URL = os.getenv("API_BASE_URL")
 api_endpoints = ["boots", "balls", "orders"]
 
 
-# get token for auth
+# Get token for auth
 def get_token():
     metadata = {"username": os.getenv("API_USER_NAME"), "password": os.getenv("API_USER_PASSWORD")}
     url = f"{API_BASE_URL}/token"
@@ -27,7 +27,7 @@ def get_token():
         return token
 
 
-# reach endpoint and get json
+# Reach endpoint and get json
 def get_data(token, endpoint):
     headers = {"Authorization": f"Bearer {token}"}
     response = requests.get(f"{API_BASE_URL}/{endpoint}", headers=headers)
@@ -36,11 +36,12 @@ def get_data(token, endpoint):
         return data
 
 
-# get token -> extract data from endpoints -> write files to bucket
 def extract_data(logger):
     try:
         t1 = time.perf_counter()
         logger.info("EXTRACTING DATA FROM API ...")
+
+        # Get token, reach endpoints and load files to bucket
         token = get_token()
         raw_files_dir = "api-pipeline/raw"
 
@@ -49,6 +50,7 @@ def extract_data(logger):
             load_file_to_bucket(data, raw_files_dir, f"{endpoint}.json", file_type="json")
             logger.info(f"{endpoint.title()} successfully extracted and loaded to bucket")
 
+        # Log extraction time
         t2 = time.perf_counter()
         logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
         logger.info("----------------------------------------------------------------")

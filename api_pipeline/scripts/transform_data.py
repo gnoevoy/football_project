@@ -2,11 +2,11 @@ from pathlib import Path
 import time
 import sys
 
-# add path path
+# Add path path
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 
-# import helper functions
+# Import helper functions
 from functions.utils import load_file_to_bucket
 from functions.transform_helpers import (
     get_products_and_orders_ids,
@@ -22,11 +22,12 @@ from functions.transform_helpers import (
 CLEAN_FILES_DIR = "api-pipeline/clean"
 
 
-# handle products data
+# Wrapping function to normalize products data and load it to bucket
 def products_wrapper(products_ids, logger):
     df = get_products_with_details(products_ids)
     logger.info("Produts data successfully extracted")
 
+    # Filter out table to get only new records
     if len(df) > 0:
         products = get_products(df)
         labels = get_labels(df)
@@ -34,7 +35,7 @@ def products_wrapper(products_ids, logger):
         sizes = get_sizes(df)
         features = get_features(df)
 
-        # load dataframes to bucket + logs
+        # Load dataframes to bucket + logs
         load_file_to_bucket(products, CLEAN_FILES_DIR, "products.csv", "csv")
         logger.info(f"Products successfully loaded to bucket, {len(products)} records")
         load_file_to_bucket(labels, CLEAN_FILES_DIR, "labels.csv", "csv")
@@ -45,28 +46,28 @@ def products_wrapper(products_ids, logger):
         logger.info(f"Sizes successfully loaded to bucket, {len(sizes)} records")
         load_file_to_bucket(features, CLEAN_FILES_DIR, "features.csv", "csv")
 
-        # boolean needs to determine if new data, if so in the next ETL step we will load it to warehouse
+        # Boolean needs to determine logic in next script for pipeline
         return True
     else:
-        logger.info("No new products found")
+        logger.info("Products data didnt loaded to bucket due to no new records")
         return False
 
 
-# handle orders data
+# The same wrapping function but for orders
 def orders_wrapper(order_ids, logger):
     orders, order_details = get_orders_and_details(order_ids)
     logger.info("Orders data successfully extracted")
 
+    # Check if there are new records
     if len(orders) > 0:
         load_file_to_bucket(orders, CLEAN_FILES_DIR, "orders.csv", "csv")
         logger.info(f"Orders successfully loaded to bucket, {len(orders)} records")
         load_file_to_bucket(order_details, CLEAN_FILES_DIR, "order_details.csv", "csv")
         logger.info(f"Order details successfully loaded to bucket, {len(order_details)} records")
 
-        # the same logic as for products
         return True
     else:
-        logger.info("No new orders found")
+        logger.info("Orders data didnt loaded to bucket due to no new records")
         return False
 
 
@@ -75,11 +76,12 @@ def transform_data(logger):
         t1 = time.perf_counter()
         logger.info("DATA TRANSFORMATION STARTED ...")
 
-        # get ids from bigquery to prevent loading already existed data to warehouse
+        # Get data from bigquery to prevent loading already existed data
         product_ids, order_ids = get_products_and_orders_ids()
         new_products = products_wrapper(product_ids, logger)
         new_orders = orders_wrapper(order_ids, logger)
 
+        # Log execution time
         t2 = time.perf_counter()
         logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
         logger.info("----------------------------------------------------------------")
