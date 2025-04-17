@@ -6,17 +6,17 @@ import time
 import sys
 import os
 
-# add python path and load variables
+# Add python path and load variables
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 load_dotenv(ROOT_DIR / ".env")
 
-# import helper functions
+# Import helper functions
 from functions.links_helpers import open_catalog, handle_cookies, get_total_items, get_links
 from functions.db_helpers import get_scraped_products
 from functions.bucket_helpers import load_file_to_bucket
 
-# dictionary for storing links
+# Dictionary for storing links
 dct = {
     "boots": {
         "base_url": os.getenv("BOOTS_URL"),
@@ -29,11 +29,11 @@ dct = {
 }
 
 
-# run scraper
+# Run playwright scraper
 def scrape_links(logger, playwright=Playwright):
     logger.info("EXTRACTING LINKS ...")
 
-    # load products from DB to avoid scraping already existing records
+    # Load already existed products from the database to avoid duplicates during scraping
     scraped_boots, scraped_balls = get_scraped_products()
 
     for category, data in dct.items():
@@ -41,37 +41,38 @@ def scrape_links(logger, playwright=Playwright):
         scraped_data = scraped_boots if category == "boots" else scraped_balls
 
         try:
-            # open catalog, handle cookies and retrieve num of products in category
+            # Open the catalog page, handle cookies, and get total items in the category
             page_num = 1
             url = f"{data["base_url"]}&page={page_num}"
             page, browser = open_catalog(playwright, url)
             handle_cookies(page)
             total_items = get_total_items(page)
 
-            # loop through pages and scrape links
+            # Loop through pages and scrape links
             t1_category = time.perf_counter()
             while True:
                 try:
+                    # Extract links from the current page
                     links, page_total, scraped_num = get_links(page, scraped_data, logger)
                     data["urls"].extend(links)
-                    # page summmary
+                    # Summary log about page
                     logger.info(f"Page: {page_num}, scraped: {scraped_num}, items on page: {page_total}")
-                except Exception:
+                except:
                     logger.error(f"Page {page_num} skipped, {url}", exc_info=True)
 
-                # construct next page URL
+                # Construct the next page URL
                 page_num += 1
                 url = f"{data["base_url"]}&page={page_num}"
                 response = requests.get(url)
 
-                # check if the page is available
+                # Check if the next page is available
                 if response.status_code == 200:
                     page.goto(url)
                     page.wait_for_selector("div.category-grid__item")
                 else:
                     break
 
-            # category summary
+            # Log category summary
             t2_category = time.perf_counter()
             logger.info(f"Category: {category}, scraped: {len(data["urls"])}, total: {total_items}, time: {round(t2_category - t1_category, 2)} seconds")
 
@@ -81,8 +82,9 @@ def scrape_links(logger, playwright=Playwright):
             browser.close()
 
 
+# Function to upload scraped links to bucket
 def load_links_to_bucket(logger):
-    # check if there are new products in the website, if so load links to bucket
+    # Check if there are new products to upload
     num = len(dct["balls"]["urls"]) + len(dct["boots"]["urls"])
 
     if num > 0:
@@ -97,16 +99,16 @@ def load_links_to_bucket(logger):
     return is_empty
 
 
-# logic: run scraper -> write data to dct -> load to bucket
 def extract_links(logger):
     try:
         t1 = time.perf_counter()
 
+        # Scrape links and upload to bucket
         with sync_playwright() as pw:
             scrape_links(logger, pw)
-
         is_empty = load_links_to_bucket(logger)
 
+        # Log execution time
         t2 = time.perf_counter()
         logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
         logger.info("----------------------------------------------------------------")

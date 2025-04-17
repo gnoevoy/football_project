@@ -4,24 +4,24 @@ import pandas as pd
 import time
 import sys
 
-# add python path
+# Add python path
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 
-# import helper functions
+# Import helper functions
 from functions.links_helpers import open_catalog, handle_cookies
 from functions.data_helpers import render_product_page, get_product, get_sizes, get_details
 from functions.db_helpers import get_max_product_id
 from functions.bucket_helpers import get_file_from_bucket, load_file_to_bucket
 
-# initialize variable for storing data
+# Initialize variables for storing data
 products, sizes, details = [], [], []
 
 
-# run scraper
+# Run playwright scraper
 def scrape_data(logger, playwrigth=Playwright):
     logger.info("EXTRACTING DATA ...")
-    # get links from bucket
+    # Retrieve links from the bucket
     links = get_file_from_bucket("web-scraping", "links.json", file_type="json")
     product_id = get_max_product_id() + 1
 
@@ -30,36 +30,36 @@ def scrape_data(logger, playwrigth=Playwright):
         category_id = 1 if category == "boots" else 2
         counter = 0
 
-        # handle case when no links in category
+        # Skip category if no links are available
         if not data["urls"]:
             logger.warning(f"Skipping category {category}, no links")
             continue
 
         try:
-            # open catalog and handle cookies
+            # Open the catalog page and handle cookie
             page, browser = open_catalog(playwrigth, data["base_url"])
             handle_cookies(page)
 
-            # loop through links and scrape data
+            # Loop through links and scrape data
             t1_category = time.perf_counter()
             for url in data["urls"]:
                 try:
-                    # render product page content
+                    # Render the product page content
                     page.goto(url)
                     content = render_product_page(page)
 
-                    # scrape core data for product, if successful try to get additional data, else skip item
-                    # flags needed to check if an item was scraped fully or not
+                    # Scrape core data and additional details
+                    # Flags needs for good logging
                     product = get_product(content, url, product_id, category_id)
                     product_sizes, sizes_flag = get_sizes(content, url, product_id, logger)
                     product_details, labels_flag, related_products_flag, features_flag, related_products_message = get_details(content, url, product_id, logger)
 
-                    # add values to lists
+                    # Append data to lists
                     products.append(product)
                     sizes.extend(product_sizes)
                     details.append(product_details)
 
-                    # summary log about a product
+                    # Summary log about product
                     flag = all([sizes_flag, labels_flag, related_products_flag, features_flag])
                     message = "Scraped successfully" if flag else "Scraped with issues"
                     if related_products_message:
@@ -72,17 +72,16 @@ def scrape_data(logger, playwrigth=Playwright):
                 except:
                     logger.error(f"Product was skipped, {url}", exc_info=True)
 
-            # category summary
+            # Log category summary
             t2_category = time.perf_counter()
             logger.info(f"Category: {category}, scraped: {counter}, total: {len(data["urls"])}, time: {round(t2_category - t1_category, 2)} seconds")
-
         except:
             logger.error(f"Category {category} skipped.", exc_info=True)
         finally:
             browser.close()
 
 
-# load lists to bucket
+# Upload all lists to the bucket
 def upload_to_bucket(logger):
     logger.info(f"UPLOADING DATA TO BUCKET ...")
     bucket_dir = "web-scraping/raw"
@@ -92,16 +91,16 @@ def upload_to_bucket(logger):
     logger.info("Files were successfully uploaded to bucket")
 
 
-# logic: scrape product pages -> write data to lists -> load to bucket
 def extract_data(logger):
     try:
         t1 = time.perf_counter()
 
+        # Get links, scrape product pages and upload data to bucket
         with sync_playwright() as pw:
             scrape_data(logger, pw)
-
         upload_to_bucket(logger)
 
+        # Log execution time
         t2 = time.perf_counter()
         logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
         logger.info("----------------------------------------------------------------")

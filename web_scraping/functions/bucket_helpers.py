@@ -3,14 +3,15 @@ import pandas as pd
 import json
 import sys
 
-# add python path
+# Add python path
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 
-# import connections
+# Import connections
 from utils.connections import bucket, bucket_name
 
 
+# Load csv / json file to storage
 def load_file_to_bucket(data, dir, file_name, file_type="json"):
     destination = f"{dir}/{file_name}"
     blob = bucket.blob(destination)
@@ -22,6 +23,7 @@ def load_file_to_bucket(data, dir, file_name, file_type="json"):
         blob.upload_from_string(content, content_type="application/json")
 
 
+# Open csv / json file
 def get_file_from_bucket(dir, file_name, file_type="json"):
     if file_type == "csv":
         path = f"gs://{bucket_name}/{dir}/{file_name}"

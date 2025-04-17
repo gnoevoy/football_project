@@ -1,23 +1,24 @@
 from pathlib import Path
 import time
 
-# import scripts
+# Import scripts
 from scripts.extract_links import extract_links
 from scripts.extract_data import extract_data
 from scripts.transform_data import transform_data
 from scripts.load_data import load_data
 from utils.logger import setup_logger
 
-# create log file
+# Create log file
 LOGS_DIR = Path(__file__).parent / "logs"
 logger = setup_logger(LOGS_DIR, "logs")
 
 
 def main():
     t1 = time.perf_counter()
+    # Extract links and check if there are new products
     is_empty = extract_links(logger)
 
-    # check if there are new products in the website
+    # If new products exist, run the next steps
     if not is_empty:
         extract_data(logger)
         transform_data(logger)
@@ -26,6 +27,7 @@ def main():
         logger.info("No new products on the website")
         logger.info("----------------------------------------------------------------")
 
+    # Measure execution time of entire pipeline
     t2 = time.perf_counter()
     logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
 

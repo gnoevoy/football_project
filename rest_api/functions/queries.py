@@ -3,15 +3,15 @@ from sqlalchemy import text
 from pathlib import Path
 import sys
 
-# add python path
+# Add python path
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 
-# import connections
+# Import connections
 from functions.connections import engine, mongo_collection
 
 
-# get product sizes in specific format
+# Retrieve product sizes in a structured format
 def get_sizes(db, product_ids):
     sizes_query = db.execute(text("SELECT * FROM sizes WHERE product_id IN :product_ids"), {"product_ids": tuple(product_ids)})
     sizes = sizes_query.mappings().all()
@@ -26,7 +26,7 @@ def get_sizes(db, product_ids):
     return dct
 
 
-# load product details from monogdb
+# Retrieve product details from MongoDB
 def get_product_details(product_id):
     details = mongo_collection.find_one({"_id": product_id})
     details.pop("_id")
@@ -34,20 +34,21 @@ def get_product_details(product_id):
     return details
 
 
+# Display products for a given category
 def display_products(category_name):
     dct = {"category_name": category_name, "products": []}
     category_id = 1 if category_name == "boots" else 2
 
     with engine.connect() as db:
-        # get category products
+        # Query the database for products in the given category
         products_query = db.execute(text("SELECT * FROM products WHERE category_id = :category_id"), {"category_id": category_id})
         products = products_query.mappings().all()
         product_ids = [product["product_id"] for product in products]
 
-        # get sizes
+        # Get sizes
         sizes = get_sizes(db, product_ids)
 
-    # compose product records with core info, sizes and details
+    # Compose product records with core info, sizes, and additional details
     for product in products:
         row = {**product}
         row["sizes"] = sizes[row["product_id"]]
@@ -56,7 +57,7 @@ def display_products(category_name):
         row["related_products"] = details["related_products"]
         row["features"] = details["features"]
 
-        # remove unnecessary data
+        # Remove unnecessary fields from the record
         for key in ["scraped_id", "url", "category_id"]:
             row.pop(key)
         dct["products"].append(row)
@@ -64,7 +65,7 @@ def display_products(category_name):
     return dct
 
 
-# get order details in comfortable format to append to orders
+# Retrieve order details in a structured format grouped by order ID
 def get_order_details_dct(db):
     order_details_query = db.execute(text("SELECT * FROM order_details"))
     order_details = order_details_query.mappings().all()
@@ -78,14 +79,15 @@ def get_order_details_dct(db):
     return dct
 
 
+# Display all orders with their associated details
 def display_orders():
     with engine.connect() as db:
-        # access orders and order details tables
+        # Query the database for all orders
         orders_query = db.execute(text("SELECT * FROM orders"))
         orders = orders_query.mappings().all()
         order_details = get_order_details_dct(db)
 
-    # compose order records with order details
+    # Compose order records with their associated details
     lst = []
     for order in orders:
         row = {**order}

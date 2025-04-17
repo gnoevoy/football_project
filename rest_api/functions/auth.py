@@ -9,11 +9,11 @@ from pydantic import BaseModel
 from pathlib import Path
 import os
 
-# load environment variables
+# Load environment variables
 ENV_PATH = Path(__file__).parents[1] / ".env"
 load_dotenv(ENV_PATH)
 
-# Import DB connection and models
+# Import connection
 from .connections import engine
 
 # JWT settings

@@ -2,8 +2,8 @@ from playwright.sync_api import expect
 from bs4 import BeautifulSoup
 
 
+# Launch browser with image blocking
 def open_catalog(playwrigth, url):
-    # Launch browser with image blocking
     browser = playwrigth.chromium.launch(headless=False)
     page = browser.new_page()
     page.route("**/*.{webp,png,jpeg,jpg}", lambda route: route.abort())
@@ -11,15 +11,15 @@ def open_catalog(playwrigth, url):
     return page, browser
 
 
+# Handle cookie consent dialog and ensure it is closed
 def handle_cookies(page):
     cookie = page.locator("div.CybotCookiebotDialogActive")
     cookie.wait_for()
     page.click("#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")
-    # Ensures the cookie dialog is closed
     expect(cookie).to_be_hidden()
 
 
-# get number of items in the category for logs
+# Extract the total number of items in the category from the page
 def get_total_items(page):
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
@@ -27,6 +27,7 @@ def get_total_items(page):
     return int(total_items.text)
 
 
+# Scrape product links from the page
 def get_links(page, data, logger):
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
@@ -38,13 +39,10 @@ def get_links(page, data, logger):
         try:
             url = item.find("a")["href"]
             product_id = int(url.split("-")[-1])
-
-            # check if the product is already scraped
+            # Add URL to the list if the product is not already scraped
             if product_id not in data:
                 lst.append(url)
                 scraped_num += 1
-
-        except Exception:
+        except:
             logger.error(f"Failed to extract url {i}, content: {item}", exc_info=True)
-
     return lst, len(items), scraped_num

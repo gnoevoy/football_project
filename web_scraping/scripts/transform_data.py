@@ -3,15 +3,15 @@ import numpy as np
 import time
 import sys
 
-# add python path
+# Add python path
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 
-# import helper functions
+# Import helper functions
 from functions.bucket_helpers import get_file_from_bucket, load_file_to_bucket
 
 
-# import data
+# Get raw files from the bucket
 def get_files(logger):
     files_dir = "web-scraping/raw"
     products = get_file_from_bucket(files_dir, "products", file_type="csv")
@@ -21,7 +21,7 @@ def get_files(logger):
     return products, sizes, details
 
 
-# clean and transform products table (iterative process with jupyter notebook)
+# Clean and transform the products DataFrame
 def transform_products(products):
     products["price"] = products["price"].str.split("\n", expand=True)[1].str.strip().str[:-2].str.replace(",", ".").astype(float)
     products["title"] = products["title"].str.split("\n", expand=True)[0].str.strip().str.title()
@@ -33,12 +33,13 @@ def transform_products(products):
     return products
 
 
+# Process sizes
 def transform_sizes(sizes):
     sizes["size"] = sizes["size"].astype("str").str.strip()
     return sizes
 
 
-# clean json file and store data in a new list
+# Process details JSON data and convert to list
 def transform_details(dct):
     details = []
 
@@ -49,6 +50,7 @@ def transform_details(dct):
 
         features = {}
         for key, value in product["features"].items():
+            # Standardize feature keys and clean their values
             if key == "Class:":
                 new_key = "type_of_class"
             else:
@@ -70,12 +72,12 @@ def load_files(products, sizes, details, logger):
     logger.info("Files were successfully uploaded to bucket")
 
 
-# logic: import files -> transform them -> load to bucket
 def transform_data(logger):
     try:
         logger.info("DATA TRANSFORMATION STARTED ...")
         t1 = time.perf_counter()
 
+        # Get files from bucket, transform them and load storage
         products, sizes, details = get_files(logger)
         products_df = transform_products(products)
         sizes_df = transform_sizes(sizes)
@@ -83,6 +85,7 @@ def transform_data(logger):
         logger.info("Data transformation was successful")
         load_files(products_df, sizes_df, details_dct, logger)
 
+        # Log execution time
         t2 = time.perf_counter()
         logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
         logger.info("----------------------------------------------------------------")

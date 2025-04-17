@@ -1,6 +1,6 @@
 services:
 
-  # REST API
+  # rest api with products and orders data
   fastapi:
     build:
       context: ./rest_api
@@ -17,7 +17,7 @@ services:
       - postgres-db
       - mongo-db
 
-  # postgres database with UI
+  # postgres db
   postgres-db:
     image: postgres:16
     container_name: postgres-db
@@ -37,6 +37,7 @@ services:
     volumes:
       - postgres-db:/var/lib/postgresql/data
 
+  # ui for postgres
   adminer:
     image: adminer
     container_name: adminer-postgres
@@ -46,7 +47,7 @@ services:
     depends_on:
       - postgres-db
 
-  # mongo database with UI
+  # mongo db
   mongo-db:
     image: mongo
     container_name: mongo-db
@@ -58,6 +59,7 @@ services:
     volumes:
       - mongo-db:/data/db
 
+  # ui for mongo
   mongo-express:
     image: mongo-express
     container_name: mongo-express

@@ -2,26 +2,25 @@ from sqlalchemy import text
 from pathlib import Path
 import sys
 
-# add python path
+# Add python path
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 
-# import connections
+# Import db's connections
 from utils.connections import engine, mongo_collection
 
 
-# helper for exrtract_links.py
+# Helper for exrtract_links.py
 def get_scraped_products():
     with engine.connect() as conn:
         boots_query = conn.execute(text("SELECT scraped_id FROM products WHERE category_id = 1"))
         balls_query = conn.execute(text("SELECT scraped_id FROM products WHERE category_id = 2"))
         boots = boots_query.scalars().all()
         balls = balls_query.scalars().all()
-
     return boots, balls
 
 
-# helper for extract_data.py
+# Helper for extract_data.py
 def get_max_product_id():
     with engine.connect() as conn:
         max_product_id = conn.execute(text("SELECT COALESCE(MAX(product_id), 0) FROM products"))
@@ -29,12 +28,12 @@ def get_max_product_id():
     return num
 
 
-# helper for transform_data.py
+# Helper for transform_data.py
 def load_to_postgre(df, table_name):
     df.to_sql(table_name, engine, if_exists="append", index=False)
 
 
-# helper for transform_data.py
+# Helper for transform_data.py
 def load_to_mongo(lst):
     mongo_collection.insert_many(lst)
     return len(lst)

@@ -15,7 +15,7 @@ def render_product_page(page):
     return content
 
 
-# scrape core data for item, no error handling (this data essential)
+# Get core data for item, no error handling
 def get_product(content, url, product_id, category_id):
     title = content.find("h1", class_="product-card__title").text
     price = content.find(
@@ -43,9 +43,9 @@ def get_product(content, url, product_id, category_id):
     return product
 
 
-### 1. each functions is responsible for different content on the product page
-### 2. all code has error handling and output problems to logger
-### 3. flags are needed for logs to check if item was scraped fully or not
+# 1. Each functions is responsible for different content on the product page
+# 2. All code has error handling and output problems to logger
+# 3. Flags are needed for logs to check if item was scraped fully or not
 
 
 def get_sizes(content, url, product_id, logger):
@@ -127,7 +127,7 @@ def get_features(content, url, logger):
     return product_features, flag
 
 
-# compose different data into one dct for storing in a mongo db
+# Compose different data into one dct for storing in a mongo db
 def get_details(content, url, product_id, logger):
     labels, labels_flag = get_labels(content, url, logger)
     related_products, related_products_flag, message = get_related_products(content, url, logger)

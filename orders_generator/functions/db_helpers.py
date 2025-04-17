@@ -6,12 +6,12 @@ from pathlib import Path
 import sys
 import os
 
-# add python path and load variables
+# Add python path and load variables
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 load_dotenv(ROOT_DIR / ".env")
 
-# postgres connection
+# Postgres connection
 USER = os.getenv("POSTGRES_USER")
 PASSWORD = os.getenv("POSTGRES_PASSWORD")
 HOST = os.getenv("POSTGRES_HOST")
@@ -35,7 +35,7 @@ def get_products_with_sizes():
         products = products_query.mappings().all()
         sizes = sizes_query.mappings().all()
 
-    # get dct with product id's keys
+    # Construct a dct with product_id as key
     dct = defaultdict(dict)
     for product in products:
         product_id = product["product_id"]
@@ -43,12 +43,12 @@ def get_products_with_sizes():
         dct[product_id]["old_price"] = product["old_price"]
         dct[product_id]["sizes"] = []
 
-    # add sizes for each product
+    # Add sizes for each product
     for size in sizes:
         product_id = size["product_id"]
         dct[product_id]["sizes"].append(size["size"])
 
-    # check for non empty sizes list for products
+    # Check for non empty sizes list
     dct = {k: v for k, v in dct.items() if v["sizes"]}
     return dct
 
