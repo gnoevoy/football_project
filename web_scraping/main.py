@@ -8,12 +8,13 @@ from scripts.transform_data import transform_data
 from scripts.load_data import load_data
 from utils.logger import setup_logger
 
-# Create log file
 LOGS_DIR = Path(__file__).parent / "logs"
-logger = setup_logger(LOGS_DIR, "logs")
 
 
 def main():
+    # Setup logger
+    logger = setup_logger(LOGS_DIR, "web_scraping")
+
     t1 = time.perf_counter()
     # Extract links and check if there are new products
     is_empty = extract_links(logger)

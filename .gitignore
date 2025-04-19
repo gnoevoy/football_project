@@ -8,6 +8,7 @@ example.py
 
 # logs
 logs/
+.log
 
 # env variables
 .env
