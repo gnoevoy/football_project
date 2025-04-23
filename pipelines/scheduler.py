@@ -1,35 +1,61 @@
-from apscheduler.events import EVENT_SCHEDULER_STARTED, EVENT_SCHEDULER_SHUTDOWN, EVENT_JOB_EXECUTED, EVENT_JOB_ERROR, EVENT_JOB_MISSED
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.executors.pool import ThreadPoolExecutor
+from datetime import datetime
+from pathlib import Path
+import logging
 import time
+import pytz
+
 
 # Import helper functions
-from utils.scheduler_config import create_scheduler, listener
+from orders_generator.main import orders_generator
+from web_scraping.main import web_scraping
+from utils.connections import engine
 
 
-def simple_func():
-    print(f"hello, {time.time()}")
+def create_scheduler():
+    # Configurations
+    timezone = pytz.timezone("Europe/Warsaw")
+    job_defaults = {"coalesce": True, "max_instances": 1}
+    executors = {"default": ThreadPoolExecutor(5)}
+    jobstores = {"postgres": SQLAlchemyJobStore(engine=engine, tableschema="public", tablename="scheduler")}
+
+    scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=timezone)
+    return scheduler
 
 
-def main():
-    # Create a scheduler instance with configurations
-    scheduler = create_scheduler()
-    scheduler.add_listener(listener, EVENT_SCHEDULER_STARTED | EVENT_SCHEDULER_SHUTDOWN | EVENT_JOB_EXECUTED | EVENT_JOB_ERROR | EVENT_JOB_MISSED)
-
-    scheduler.add_job(
-        simple_func,
-        "interval",
-        seconds=10,
-        id="simple_func",
-        replace_existing=True,
-        jobstore="postgres",
-    )
-
+def run_scheduler():
     try:
+        # Set up logger
+        LOGS_DIR = Path(__file__).parent / "logs" / "scheduler"
+        timestamp = datetime.now().strftime("%m-%d_%H:%M:%S")
+        file_name = f"{LOGS_DIR}/logs_{timestamp}.log"
+
+        logger = logging.getLogger("apscheduler")
+        logger.propagate = False
+        logger.setLevel(logging.INFO)
+        file_handler = logging.FileHandler(file_name)
+        logger.addHandler(file_handler)
+
+        # Create configurated scheduler and start it
+        scheduler = create_scheduler()
         scheduler.start()
+
+        # Get next run time for each job
+        for job in scheduler.get_jobs():
+            logger.info(job)
+
+        # Jobs
+        scheduler.add_job(orders_generator, "cron", minute="*", id="orders_generator", args=[2], replace_existing=True, jobstore="postgres")
+
+        # Infinite loop to run scheduler
         while True:
             time.sleep(1)
-    except (KeyboardInterrupt, SystemExit):
+    except:
+        logger.error("", exc_info=True)
         scheduler.shutdown()
 
 
 if __name__ == "__main__":
-    main()
+    run_scheduler()

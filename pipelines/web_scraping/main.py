@@ -1,18 +1,22 @@
 from pathlib import Path
 import time
+import sys
+
+# Add python path
+PIPELINES_DIR = Path(__file__).parents[1]
+sys.path.insert(0, str(PIPELINES_DIR))
 
 # Import scripts
-from scripts.extract_links import extract_links
-from scripts.extract_data import extract_data
-from scripts.transform_data import transform_data
-from scripts.load_data import load_data
+from web_scraping.scripts.extract_links import extract_links
+from web_scraping.scripts.extract_data import extract_data
+from web_scraping.scripts.transform_data import transform_data
+from web_scraping.scripts.load_data import load_data
 from utils.logger import setup_logger
 
-LOGS_DIR = Path(__file__).parent / "logs"
 
-
-def main():
-    # Setup logger
+def web_scraping():
+    # Set up logger
+    LOGS_DIR = PIPELINES_DIR / "logs" / "web_scraping"
     logger = setup_logger(LOGS_DIR, "web_scraping")
 
     t1 = time.perf_counter()
@@ -34,4 +38,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    web_scraping()

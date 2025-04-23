@@ -1,24 +1,14 @@
 from collections import defaultdict
-from sqlalchemy import create_engine
 from sqlalchemy import text
-from dotenv import load_dotenv
 from pathlib import Path
 import sys
-import os
 
-# Add python path and load variables
-ROOT_DIR = Path(__file__).parents[1]
-sys.path.insert(0, str(ROOT_DIR))
-load_dotenv(ROOT_DIR / ".env")
+# Add python path
+PIPELINES_DIR = Path(__file__).parents[1]
+sys.path.insert(0, str(PIPELINES_DIR))
 
-# Postgres connection
-USER = os.getenv("POSTGRES_USER")
-PASSWORD = os.getenv("POSTGRES_PASSWORD")
-HOST = os.getenv("POSTGRES_HOST")
-PORT = os.getenv("POSTGRES_PORT")
-DB_NAME = os.getenv("POSTGRES_DB")
-SCHEMA = os.getenv("POSTGRES_SCHEMA")
-engine = create_engine(f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}?options=-csearch_path%3D{SCHEMA}")
+# Import db engine
+from utils.connections import engine
 
 
 def get_max_order_id():

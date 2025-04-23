@@ -3,12 +3,12 @@ import time
 import sys
 
 # Add python path
-ROOT_DIR = Path(__file__).parents[1]
-sys.path.insert(0, str(ROOT_DIR))
+PIPELINES_DIR = Path(__file__).parents[2]
+sys.path.insert(0, str(PIPELINES_DIR))
 
 # Import helper functions
-from functions.bucket_helpers import get_file_from_bucket
-from functions.db_helpers import load_to_postgre, load_to_mongo, update_summary_table
+from web_scraping.functions.db_helpers import load_to_postgre, load_to_mongo, update_summary_table
+from utils.cloud_helpers import get_file_from_bucket
 
 
 # Get cleaned files from the bucket

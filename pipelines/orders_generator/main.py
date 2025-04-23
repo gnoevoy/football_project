@@ -1,29 +1,25 @@
 from pathlib import Path
 import pandas as pd
-import logging
 import time
+import sys
+
+# Add python path
+PIPELINES_DIR = Path(__file__).parents[1]
+sys.path.insert(0, str(PIPELINES_DIR))
 
 # Import helper functions
-from functions.db_helpers import get_max_order_id, get_products_with_sizes, load_to_postgre
-from functions.orders_helpers import generate_orders
+from utils.logger import setup_logger
+from orders_generator.db_helpers import get_max_order_id, get_products_with_sizes, load_to_postgre
+from orders_generator.orders_helpers import generate_orders
 
 
-def setup_logger():
-    LOG_FILE_PATH = Path(__file__).parent / "orders.log"
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s | %(levelname)s | %(message)s",
-        datefmt="%Y-%m-%d_%H:%M:%S",
-        filename=LOG_FILE_PATH,
-        filemode="w",
-    )
-    return logging.getLogger()
-
-
-def main(orders_num):
+def orders_generator(orders_num):
     try:
+        # Set up logger
+        LOGS_DIR = PIPELINES_DIR / "logs" / "orders_generator"
+        logger = setup_logger(LOGS_DIR, "orders")
+
         t1 = time.perf_counter()
-        logger = setup_logger()
         logger.info("GENERATING ORDERS STARTED ..")
 
         # Generate orders and order details
@@ -43,7 +39,8 @@ def main(orders_num):
         logger.info("----------------------------------------------------------------")
     except:
         logger.error("", exc_info=True)
+        raise
 
 
 if __name__ == "__main__":
-    main(100)
+    orders_generator(2)

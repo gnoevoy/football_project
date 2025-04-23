@@ -3,8 +3,8 @@ from pathlib import Path
 import sys
 
 # Add python path
-ROOT_DIR = Path(__file__).parents[1]
-sys.path.insert(0, str(ROOT_DIR))
+PIPELINES_DIR = Path(__file__).parents[2]
+sys.path.insert(0, str(PIPELINES_DIR))
 
 # Import db's connections
 from utils.connections import engine, mongo_collection

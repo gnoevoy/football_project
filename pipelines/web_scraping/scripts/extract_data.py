@@ -5,14 +5,14 @@ import time
 import sys
 
 # Add python path
-ROOT_DIR = Path(__file__).parents[1]
-sys.path.insert(0, str(ROOT_DIR))
+PIPELINES_DIR = Path(__file__).parents[2]
+sys.path.insert(0, str(PIPELINES_DIR))
 
 # Import helper functions
-from functions.links_helpers import open_catalog, handle_cookies
-from functions.data_helpers import render_product_page, get_product, get_sizes, get_details
-from functions.db_helpers import get_max_product_id
-from functions.bucket_helpers import get_file_from_bucket, load_file_to_bucket
+from web_scraping.functions.links_helpers import open_catalog, handle_cookies
+from web_scraping.functions.data_helpers import render_product_page, get_product, get_sizes, get_details
+from web_scraping.functions.db_helpers import get_max_product_id
+from utils.cloud_helpers import get_file_from_bucket, load_file_to_bucket
 
 # Initialize variables for storing data
 products, sizes, details = [], [], []

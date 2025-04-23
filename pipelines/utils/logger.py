@@ -21,11 +21,6 @@ def setup_logger(dir, logger_name):
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(formatter)
-
-    # Add handlers to the logger
-    logger.addHandler(console_handler)
+    # Add handler to the logger
     logger.addHandler(file_handler)
     return logger

@@ -4,11 +4,11 @@ import time
 import sys
 
 # Add python path
-ROOT_DIR = Path(__file__).parents[1]
-sys.path.insert(0, str(ROOT_DIR))
+PIPELINES_DIR = Path(__file__).parents[2]
+sys.path.insert(0, str(PIPELINES_DIR))
 
 # Import helper functions
-from functions.bucket_helpers import get_file_from_bucket, load_file_to_bucket
+from utils.cloud_helpers import get_file_from_bucket, load_file_to_bucket
 
 
 # Get raw files from the bucket

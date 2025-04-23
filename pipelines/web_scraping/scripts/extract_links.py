@@ -7,14 +7,14 @@ import sys
 import os
 
 # Add python path and load variables
-ROOT_DIR = Path(__file__).parents[1]
-sys.path.insert(0, str(ROOT_DIR))
-load_dotenv(ROOT_DIR / ".env")
+PIPELINES_DIR = Path(__file__).parents[2]
+sys.path.insert(0, str(PIPELINES_DIR))
+load_dotenv(PIPELINES_DIR / ".env")
 
 # Import helper functions
-from functions.links_helpers import open_catalog, handle_cookies, get_total_items, get_links
-from functions.db_helpers import get_scraped_products
-from functions.bucket_helpers import load_file_to_bucket
+from web_scraping.functions.links_helpers import open_catalog, handle_cookies, get_total_items, get_links
+from web_scraping.functions.db_helpers import get_scraped_products
+from utils.cloud_helpers import load_file_to_bucket
 
 # Dictionary for storing links
 dct = {
