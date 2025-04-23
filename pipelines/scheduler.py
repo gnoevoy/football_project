@@ -1,44 +1,20 @@
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from apscheduler.executors.pool import ThreadPoolExecutor
-from datetime import datetime
 from pathlib import Path
-import logging
 import time
-import pytz
-
 
 # Import helper functions
 from orders_generator.main import orders_generator
 from web_scraping.main import web_scraping
-from utils.connections import engine
-
-
-def create_scheduler():
-    # Configurations
-    timezone = pytz.timezone("Europe/Warsaw")
-    job_defaults = {"coalesce": True, "max_instances": 1}
-    executors = {"default": ThreadPoolExecutor(5)}
-    jobstores = {"postgres": SQLAlchemyJobStore(engine=engine, tableschema="public", tablename="scheduler")}
-
-    scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=timezone)
-    return scheduler
+from analytics_pipeline.main import analytics_pipeline
+from utils.scheduler_helpers import create_scheduler, sheduler_logger
 
 
 def run_scheduler():
     try:
         # Set up logger
         LOGS_DIR = Path(__file__).parent / "logs" / "scheduler"
-        timestamp = datetime.now().strftime("%m-%d_%H:%M:%S")
-        file_name = f"{LOGS_DIR}/logs_{timestamp}.log"
+        logger = sheduler_logger(LOGS_DIR)
 
-        logger = logging.getLogger("apscheduler")
-        logger.propagate = False
-        logger.setLevel(logging.INFO)
-        file_handler = logging.FileHandler(file_name)
-        logger.addHandler(file_handler)
-
-        # Create configurated scheduler and start it
+        # Start scheduler
         scheduler = create_scheduler()
         scheduler.start()
 
@@ -47,7 +23,13 @@ def run_scheduler():
             logger.info(job)
 
         # Jobs
-        scheduler.add_job(orders_generator, "cron", minute="*", id="orders_generator", args=[2], replace_existing=True, jobstore="postgres")
+        # scheduler.add_job(web_scraping, "cron", hour=10, minute=10, day="*/3", id="web_scraping", replace_existing=True, jobstore="postgres")
+        # scheduler.add_job(orders_generator, "cron", hour=10, minute=0, id="orders_generator", replace_existing=True, jobstore="postgres")
+
+        # test jobs for local and docker
+        scheduler.add_job(orders_generator, trigger="cron", minute="*", id="orders_generator", replace_existing=True, jobstore="postgres")
+        scheduler.add_job(web_scraping, trigger="cron", minute="*/2", id="web_scraping", replace_existing=True, jobstore="postgres")
+        scheduler.add_job(analytics_pipeline, trigger="cron", minute="*/2", id="analytics_pipeline", replace_existing=True, jobstore="postgres")
 
         # Infinite loop to run scheduler
         while True:

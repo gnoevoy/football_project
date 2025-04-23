@@ -38,19 +38,16 @@ def load_data_to_db(products, sizes, details, logger):
 
 
 def load_data(logger):
-    try:
-        logger.info("LOADING DATA STARTED ...")
-        t1 = time.perf_counter()
+    logger.info("LOADING DATA STARTED ...")
+    t1 = time.perf_counter()
 
-        # Load data to db's and update summary table
-        products, sizes, details = get_files(logger)
-        boots, balls = load_data_to_db(products, sizes, details, logger)
-        update_summary_table(boots, balls)
-        logger.info(f"Summary table successfully updated, boots: {boots}, balls {balls}")
+    # Load data to db's and update summary table
+    products, sizes, details = get_files(logger)
+    boots, balls = load_data_to_db(products, sizes, details, logger)
+    update_summary_table(boots, balls)
+    logger.info(f"Summary table successfully updated, boots: {boots}, balls {balls}")
 
-        # Log execution time
-        t2 = time.perf_counter()
-        logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
-        logger.info("----------------------------------------------------------------")
-    except:
-        logger.error(f"", exc_info=True)
+    # Log execution time
+    t2 = time.perf_counter()
+    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
+    logger.info("----------------------------------------------------------------")

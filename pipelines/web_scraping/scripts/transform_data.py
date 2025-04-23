@@ -73,21 +73,18 @@ def load_files(products, sizes, details, logger):
 
 
 def transform_data(logger):
-    try:
-        logger.info("DATA TRANSFORMATION STARTED ...")
-        t1 = time.perf_counter()
+    logger.info("DATA TRANSFORMATION STARTED ...")
+    t1 = time.perf_counter()
 
-        # Get files from bucket, transform them and load storage
-        products, sizes, details = get_files(logger)
-        products_df = transform_products(products)
-        sizes_df = transform_sizes(sizes)
-        details_dct = transform_details(details)
-        logger.info("Data transformation was successful")
-        load_files(products_df, sizes_df, details_dct, logger)
+    # Get files from bucket, transform them and load storage
+    products, sizes, details = get_files(logger)
+    products_df = transform_products(products)
+    sizes_df = transform_sizes(sizes)
+    details_dct = transform_details(details)
+    logger.info("Data transformation was successful")
+    load_files(products_df, sizes_df, details_dct, logger)
 
-        # Log execution time
-        t2 = time.perf_counter()
-        logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
-        logger.info("----------------------------------------------------------------")
-    except:
-        logger.error(f"", exc_info=True)
+    # Log execution time
+    t2 = time.perf_counter()
+    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
+    logger.info("----------------------------------------------------------------")

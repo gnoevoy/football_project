@@ -3,12 +3,12 @@ import time
 import sys
 
 # Add path path
-ROOT_DIR = Path(__file__).parents[1]
-sys.path.insert(0, str(ROOT_DIR))
+PIPELINES_DIR = Path(__file__).parents[2]
+sys.path.insert(0, str(PIPELINES_DIR))
 
 # Import helper functions
-from functions.utils import load_file_to_bucket
-from functions.transform_helpers import (
+from utils.cloud_helpers import load_file_to_bucket
+from analytics_pipeline.scripts.transform_helpers import (
     get_products_and_orders_ids,
     get_products_with_details,
     get_products,
@@ -67,24 +67,21 @@ def orders_wrapper(order_ids, logger):
 
         return True
     else:
-        logger.info("Orders data didnt loaded to bucket due to no new records")
+        logger.info("Orders data didn't loaded to bucket due to no new records")
         return False
 
 
 def transform_data(logger):
-    try:
-        t1 = time.perf_counter()
-        logger.info("DATA TRANSFORMATION STARTED ...")
+    t1 = time.perf_counter()
+    logger.info("DATA TRANSFORMATION STARTED ...")
 
-        # Get data from bigquery to prevent loading already existed data
-        product_ids, order_ids = get_products_and_orders_ids()
-        new_products = products_wrapper(product_ids, logger)
-        new_orders = orders_wrapper(order_ids, logger)
+    # Get data from bigquery to prevent loading already existed data
+    product_ids, order_ids = get_products_and_orders_ids()
+    new_products = products_wrapper(product_ids, logger)
+    new_orders = orders_wrapper(order_ids, logger)
 
-        # Log execution time
-        t2 = time.perf_counter()
-        logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
-        logger.info("----------------------------------------------------------------")
-        return new_products, new_orders
-    except:
-        logger.error(f"", exc_info=True)
+    # Log execution time
+    t2 = time.perf_counter()
+    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
+    logger.info("----------------------------------------------------------------")
+    return new_products, new_orders

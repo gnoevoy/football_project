@@ -1,4 +1,5 @@
 from pathlib import Path
+from google.cloud import bigquery
 import pandas as pd
 import json
 import sys
@@ -38,6 +39,6 @@ def get_file_from_bucket(dir, file_name, file_type="json"):
 
 # Load csv file from bucket to bigquery
 def load_table_to_bigquery(gcs_url, table_id):
-    job_config = bigquery_client.LoadJobConfig(skip_leading_rows=1, source_format=bigquery_client.SourceFormat.CSV)
+    job_config = bigquery.LoadJobConfig(skip_leading_rows=1, source_format=bigquery.SourceFormat.CSV)
     load_job = bigquery_client.load_table_from_uri(gcs_url, table_id, job_config=job_config)
     load_job.result()

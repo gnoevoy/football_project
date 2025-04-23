@@ -5,13 +5,13 @@ import numpy as np
 import sys
 import os
 
-# Add path path
-ROOT_DIR = Path(__file__).parents[1]
-sys.path.insert(0, str(ROOT_DIR))
-load_dotenv(ROOT_DIR / ".env")
+# Add python path and load variables
+PIPELINES_DIR = Path(__file__).parents[2]
+sys.path.insert(0, str(PIPELINES_DIR))
+load_dotenv(PIPELINES_DIR / ".env")
 
 # Import helper functions
-from functions.utils import get_file_from_bucket, bigquery_client
+from utils.cloud_helpers import get_file_from_bucket, bigquery_client
 
 
 # Retrieve product and order IDs from BigQuery

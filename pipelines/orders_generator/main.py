@@ -13,7 +13,7 @@ from orders_generator.db_helpers import get_max_order_id, get_products_with_size
 from orders_generator.orders_helpers import generate_orders
 
 
-def orders_generator(orders_num):
+def orders_generator():
     try:
         # Set up logger
         LOGS_DIR = PIPELINES_DIR / "logs" / "orders_generator"
@@ -23,6 +23,7 @@ def orders_generator(orders_num):
         logger.info("GENERATING ORDERS STARTED ..")
 
         # Generate orders and order details
+        orders_num = 100
         order_id = get_max_order_id() + 1
         products = get_products_with_sizes()
         orders, order_details, order_details_num = generate_orders(orders_num, order_id, products)
@@ -43,4 +44,4 @@ def orders_generator(orders_num):
 
 
 if __name__ == "__main__":
-    orders_generator(2)
+    orders_generator()

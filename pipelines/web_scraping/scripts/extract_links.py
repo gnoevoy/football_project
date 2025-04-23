@@ -100,18 +100,15 @@ def load_links_to_bucket(logger):
 
 
 def extract_links(logger):
-    try:
-        t1 = time.perf_counter()
+    t1 = time.perf_counter()
 
-        # Scrape links and upload to bucket
-        with sync_playwright() as pw:
-            scrape_links(logger, pw)
-        is_empty = load_links_to_bucket(logger)
+    # Scrape links and upload to bucket
+    with sync_playwright() as pw:
+        scrape_links(logger, pw)
+    is_empty = load_links_to_bucket(logger)
 
-        # Log execution time
-        t2 = time.perf_counter()
-        logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
-        logger.info("----------------------------------------------------------------")
-        return is_empty
-    except:
-        logger.error(f"", exc_info=True)
+    # Log execution time
+    t2 = time.perf_counter()
+    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
+    logger.info("----------------------------------------------------------------")
+    return is_empty

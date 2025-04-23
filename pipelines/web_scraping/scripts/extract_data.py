@@ -92,17 +92,14 @@ def upload_to_bucket(logger):
 
 
 def extract_data(logger):
-    try:
-        t1 = time.perf_counter()
+    t1 = time.perf_counter()
 
-        # Get links, scrape product pages and upload data to bucket
-        with sync_playwright() as pw:
-            scrape_data(logger, pw)
-        upload_to_bucket(logger)
+    # Get links, scrape product pages and upload data to bucket
+    with sync_playwright() as pw:
+        scrape_data(logger, pw)
+    upload_to_bucket(logger)
 
-        # Log execution time
-        t2 = time.perf_counter()
-        logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
-        logger.info("----------------------------------------------------------------")
-    except:
-        logger.error(f"", exc_info=True)
+    # Log execution time
+    t2 = time.perf_counter()
+    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
+    logger.info("----------------------------------------------------------------")
