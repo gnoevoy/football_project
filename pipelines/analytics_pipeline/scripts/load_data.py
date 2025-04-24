@@ -1,13 +1,14 @@
 from dotenv import load_dotenv
 from pathlib import Path
-import time
 import sys
 import os
 
 # Add python path and load variables
 PIPELINES_DIR = Path(__file__).parents[2]
 sys.path.insert(0, str(PIPELINES_DIR))
-load_dotenv(PIPELINES_DIR / ".env")
+ENV_FILE = PIPELINES_DIR / ".env"
+if ENV_FILE.exists():
+    load_dotenv(ENV_FILE)
 
 # Import helper functions
 from utils.cloud_helpers import load_table_to_bigquery
@@ -37,7 +38,6 @@ def load_order_tables(logger):
 
 
 def load_data(new_products, new_orders, logger):
-    t1 = time.perf_counter()
     logger.info("LOADING DATA STARTED...")
 
     # Load data to warehouse if there are new records
@@ -51,7 +51,4 @@ def load_data(new_products, new_orders, logger):
     else:
         logger.info("No new orders data")
 
-    # Log execution time
-    t2 = time.perf_counter()
-    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
     logger.info("----------------------------------------------------------------")

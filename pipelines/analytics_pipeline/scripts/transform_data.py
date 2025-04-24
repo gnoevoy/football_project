@@ -1,5 +1,4 @@
 from pathlib import Path
-import time
 import sys
 
 # Add path path
@@ -19,15 +18,14 @@ from analytics_pipeline.scripts.transform_helpers import (
     get_orders_and_details,
 )
 
-CLEAN_FILES_DIR = "api-pipeline/clean"
 
-
-# Wrapping function to normalize products data and load it to bucket
-def products_wrapper(products_ids, logger):
+# Wrapper function to handle products data logic
+def products_wrapper(products_ids, clean_files_dir, logger):
+    # Get single dataframe with all products data
     df = get_products_with_details(products_ids)
     logger.info("Produts data successfully extracted")
 
-    # Filter out table to get only new records
+    # Check if there are new records, if so load to bucket
     if len(df) > 0:
         products = get_products(df)
         labels = get_labels(df)
@@ -36,52 +34,53 @@ def products_wrapper(products_ids, logger):
         features = get_features(df)
 
         # Load dataframes to bucket + logs
-        load_file_to_bucket(products, CLEAN_FILES_DIR, "products.csv", "csv")
-        logger.info(f"Products successfully loaded to bucket, {len(products)} records")
-        load_file_to_bucket(labels, CLEAN_FILES_DIR, "labels.csv", "csv")
-        logger.info(f"Labels successfully loaded to bucket, {len(labels)} records")
-        load_file_to_bucket(related_products, CLEAN_FILES_DIR, "related_products.csv", "csv")
-        logger.info(f"Related products successfully loaded to bucket, {len(related_products)} records")
-        load_file_to_bucket(sizes, CLEAN_FILES_DIR, "sizes.csv", "csv")
-        logger.info(f"Sizes successfully loaded to bucket, {len(sizes)} records")
-        load_file_to_bucket(features, CLEAN_FILES_DIR, "features.csv", "csv")
+        load_file_to_bucket(products, clean_files_dir, "products.csv", "csv")
+        load_file_to_bucket(labels, clean_files_dir, "labels.csv", "csv")
+        load_file_to_bucket(related_products, clean_files_dir, "related_products.csv", "csv")
+        load_file_to_bucket(sizes, clean_files_dir, "sizes.csv", "csv")
+        load_file_to_bucket(features, clean_files_dir, "features.csv", "csv")
+        logger.info(
+            f"Data successfully loaded to bucket, products: {len(products)}, labels: {len(labels)}, related_products: {len(related_products)}, sizes: {len(sizes)}, features: {len(features)}"
+        )
 
-        # Boolean needs to determine logic in next script for pipeline
-        return True
+        # Important boolean to determine if there are new records, helps in the next script (load_data.py)
+        new_records = True
+        return new_records
     else:
         logger.info("Products data didnt loaded to bucket due to no new records")
-        return False
+        new_records = False
+        return new_records
 
 
-# The same wrapping function but for orders
-def orders_wrapper(order_ids, logger):
+# Wrapper function to handle orders data logic
+def orders_wrapper(order_ids, clean_files_dir, logger):
     orders, order_details = get_orders_and_details(order_ids)
     logger.info("Orders data successfully extracted")
 
-    # Check if there are new records
+    # Check if there are new records, if so load to bucket
     if len(orders) > 0:
-        load_file_to_bucket(orders, CLEAN_FILES_DIR, "orders.csv", "csv")
-        logger.info(f"Orders successfully loaded to bucket, {len(orders)} records")
-        load_file_to_bucket(order_details, CLEAN_FILES_DIR, "order_details.csv", "csv")
-        logger.info(f"Order details successfully loaded to bucket, {len(order_details)} records")
+        load_file_to_bucket(orders, clean_files_dir, "orders.csv", "csv")
+        load_file_to_bucket(order_details, clean_files_dir, "order_details.csv", "csv")
+        logger.info(f"Data successfully loaded to bucket, orders: {len(orders)}, order_details: {len(order_details)}")
 
-        return True
+        # The same boolean as in the products wrapper
+        new_records = True
+        return new_records
     else:
         logger.info("Orders data didn't loaded to bucket due to no new records")
-        return False
+        new_records = False
+        return new_records
 
 
 def transform_data(logger):
-    t1 = time.perf_counter()
     logger.info("DATA TRANSFORMATION STARTED ...")
+    clean_files_dir = "api-pipeline/clean"
 
-    # Get data from bigquery to prevent loading already existed data
+    # Get ids to prevent loading duplicate records to bigquery
     product_ids, order_ids = get_products_and_orders_ids()
-    new_products = products_wrapper(product_ids, logger)
-    new_orders = orders_wrapper(order_ids, logger)
+    # Retrieve data, transform it and if there are new records load to bucket
+    new_products = products_wrapper(product_ids, clean_files_dir, logger)
+    new_orders = orders_wrapper(order_ids, clean_files_dir, logger)
 
-    # Log execution time
-    t2 = time.perf_counter()
-    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
     logger.info("----------------------------------------------------------------")
     return new_products, new_orders

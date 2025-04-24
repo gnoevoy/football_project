@@ -8,9 +8,9 @@ PIPELINES_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(PIPELINES_DIR))
 
 # Import helper functions
-from utils.logger import setup_logger
 from orders_generator.db_helpers import get_max_order_id, get_products_with_sizes, load_to_postgre
 from orders_generator.orders_helpers import generate_orders
+from utils.logger import setup_logger
 
 
 def orders_generator():

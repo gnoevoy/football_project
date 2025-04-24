@@ -6,7 +6,7 @@ import sys
 PIPELINES_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(PIPELINES_DIR))
 
-# Import scripts
+# Import scripts and logger
 from web_scraping.scripts.extract_links import extract_links
 from web_scraping.scripts.extract_data import extract_data
 from web_scraping.scripts.transform_data import transform_data

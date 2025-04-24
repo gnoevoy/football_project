@@ -1,5 +1,4 @@
 from pathlib import Path
-import time
 import sys
 
 # Add python path
@@ -31,7 +30,7 @@ def load_data_to_db(products, sizes, details, logger):
     mongo_num = load_to_mongo(details)
     logger.info(f"Data was successfully loaded, postgres: {products_num}, mongo: {mongo_num}")
 
-    # Calculate values for summary table record
+    # Calculate values for summary table record (how many new items for each category)
     boots = len(products.query("category_id == 1"))
     balls = len(products.query("category_id == 2"))
     return boots, balls
@@ -39,15 +38,10 @@ def load_data_to_db(products, sizes, details, logger):
 
 def load_data(logger):
     logger.info("LOADING DATA STARTED ...")
-    t1 = time.perf_counter()
 
     # Load data to db's and update summary table
     products, sizes, details = get_files(logger)
     boots, balls = load_data_to_db(products, sizes, details, logger)
     update_summary_table(boots, balls)
     logger.info(f"Summary table successfully updated, boots: {boots}, balls {balls}")
-
-    # Log execution time
-    t2 = time.perf_counter()
-    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
     logger.info("----------------------------------------------------------------")

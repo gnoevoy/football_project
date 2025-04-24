@@ -9,7 +9,9 @@ import os
 # Add python path and load variables
 PIPELINES_DIR = Path(__file__).parents[2]
 sys.path.insert(0, str(PIPELINES_DIR))
-load_dotenv(PIPELINES_DIR / ".env")
+ENV_FILE = PIPELINES_DIR / ".env"
+if ENV_FILE.exists():
+    load_dotenv(ENV_FILE)
 
 # Import helper functions
 from web_scraping.functions.links_helpers import open_catalog, handle_cookies, get_total_items, get_links
@@ -91,6 +93,7 @@ def load_links_to_bucket(logger):
         logger.info(f"UPLOADING LINKS TO BUCKET ...")
         load_file_to_bucket(dct, "web-scraping", "links.json", file_type="json")
         logger.info("File was successfully upload to bucket")
+        # flag for preventing execute next etl steps if there are no new products
         is_empty = False
     else:
         logger.info("Not detected new products in a website")
@@ -100,15 +103,9 @@ def load_links_to_bucket(logger):
 
 
 def extract_links(logger):
-    t1 = time.perf_counter()
-
     # Scrape links and upload to bucket
     with sync_playwright() as pw:
         scrape_links(logger, pw)
     is_empty = load_links_to_bucket(logger)
-
-    # Log execution time
-    t2 = time.perf_counter()
-    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
     logger.info("----------------------------------------------------------------")
     return is_empty

@@ -11,12 +11,13 @@ sys.path.insert(0, str(ROOT_DIR))
 from functions.connections import engine, mongo_collection
 
 
-# Retrieve product sizes in a structured format
+# Retrieve product sizes
 def get_sizes(db, product_ids):
     sizes_query = db.execute(text("SELECT * FROM sizes WHERE product_id IN :product_ids"), {"product_ids": tuple(product_ids)})
     sizes = sizes_query.mappings().all()
     dct = defaultdict(lambda: {"in_stock": [], "out_of_stock": []})
 
+    # Add sizes to the dct
     for size in sizes:
         product_id = size["product_id"]
         if size["in_stock"]:
@@ -48,7 +49,7 @@ def display_products(category_name):
         # Get sizes
         sizes = get_sizes(db, product_ids)
 
-    # Compose product records with core info, sizes, and additional details
+    # Compose product records with core info, sizes, and additional details from MongoDB
     for product in products:
         row = {**product}
         row["sizes"] = sizes[row["product_id"]]
@@ -79,7 +80,7 @@ def get_order_details_dct(db):
     return dct
 
 
-# Display all orders with their associated details
+# Display all orders with their details
 def display_orders():
     with engine.connect() as db:
         # Query the database for all orders
@@ -87,7 +88,7 @@ def display_orders():
         orders = orders_query.mappings().all()
         order_details = get_order_details_dct(db)
 
-    # Compose order records with their associated details
+    # Compose order records with their details
     lst = []
     for order in orders:
         row = {**order}

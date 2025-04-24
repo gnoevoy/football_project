@@ -25,6 +25,7 @@ def scrape_data(logger, playwrigth=Playwright):
     links = get_file_from_bucket("web-scraping", "links.json", file_type="json")
     product_id = get_max_product_id() + 1
 
+    # Loop over categories with links and scrape data
     for category, data in links.items():
         logger.info(f"Category: {category}")
         category_id = 1 if category == "boots" else 2
@@ -49,10 +50,9 @@ def scrape_data(logger, playwrigth=Playwright):
                     content = render_product_page(page)
 
                     # Scrape core data and additional details
-                    # Flags needs for good logging
                     product = get_product(content, url, product_id, category_id)
-                    product_sizes, sizes_flag = get_sizes(content, url, product_id, logger)
-                    product_details, labels_flag, related_products_flag, features_flag, related_products_message = get_details(content, url, product_id, logger)
+                    product_sizes = get_sizes(content, url, product_id, logger)
+                    product_details, related_products_flag = get_details(content, url, product_id, logger)
 
                     # Append data to lists
                     products.append(product)
@@ -60,12 +60,12 @@ def scrape_data(logger, playwrigth=Playwright):
                     details.append(product_details)
 
                     # Summary log about product
-                    flag = all([sizes_flag, labels_flag, related_products_flag, features_flag])
-                    message = "Scraped successfully" if flag else "Scraped with issues"
-                    if related_products_message:
-                        logger.info(f"{message}, {related_products_message} - {url}")
+                    if related_products_flag:
+                        logger.info(f"Product scraped - {url}")
                     else:
-                        logger.info(f"{message} - {url}")
+                        logger.info(f"Product scraped, no related products - {url}")
+
+                    # Increment product ID and counter
                     product_id += 1
                     counter += 1
 
@@ -92,14 +92,8 @@ def upload_to_bucket(logger):
 
 
 def extract_data(logger):
-    t1 = time.perf_counter()
-
     # Get links, scrape product pages and upload data to bucket
     with sync_playwright() as pw:
         scrape_data(logger, pw)
     upload_to_bucket(logger)
-
-    # Log execution time
-    t2 = time.perf_counter()
-    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
     logger.info("----------------------------------------------------------------")

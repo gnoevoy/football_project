@@ -11,6 +11,7 @@ sys.path.insert(0, str(PIPELINES_DIR))
 from utils.connections import engine
 
 
+# Retrieve highest order_id from db
 def get_max_order_id():
     with engine.connect() as conn:
         max_order_id = conn.execute(text("SELECT COALESCE(MAX(order_id), 0) FROM orders"))
@@ -18,6 +19,7 @@ def get_max_order_id():
     return num
 
 
+# Retrieve necessaty data for generating orders
 def get_products_with_sizes():
     with engine.connect() as conn:
         products_query = conn.execute(text("SELECT product_id, price, old_price FROM products"))

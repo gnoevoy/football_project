@@ -6,11 +6,11 @@ import sys
 PIPELINES_DIR = Path(__file__).parents[2]
 sys.path.insert(0, str(PIPELINES_DIR))
 
-# Import db's connections
+# Import db connections
 from utils.connections import engine, mongo_collection
 
 
-# Helper for exrtract_links.py
+# Get already scraped products from db (helper for extract_links.py)
 def get_scraped_products():
     with engine.connect() as conn:
         boots_query = conn.execute(text("SELECT scraped_id FROM products WHERE category_id = 1"))
@@ -20,7 +20,7 @@ def get_scraped_products():
     return boots, balls
 
 
-# Helper for extract_data.py
+# Retrieve the last product_id from db (helper for extract_data.py)
 def get_max_product_id():
     with engine.connect() as conn:
         max_product_id = conn.execute(text("SELECT COALESCE(MAX(product_id), 0) FROM products"))
@@ -28,18 +28,18 @@ def get_max_product_id():
     return num
 
 
-# Helper for transform_data.py
+# Load pandas dataframe to PostgreSQL
 def load_to_postgre(df, table_name):
     df.to_sql(table_name, engine, if_exists="append", index=False)
 
 
-# Helper for transform_data.py
+# Append data to MongoDB
 def load_to_mongo(lst):
     mongo_collection.insert_many(lst)
     return len(lst)
 
 
-# Update summary table, track how many records were added from scraping
+# Summary table reflects the number of new products added to the database for each catefory
 def update_summary_table(boots, balls):
     with engine.connect() as conn:
         total = conn.execute(text("SELECT COUNT(*) FROM products"))

@@ -1,6 +1,5 @@
 from pathlib import Path
 import numpy as np
-import time
 import sys
 
 # Add python path
@@ -21,7 +20,7 @@ def get_files(logger):
     return products, sizes, details
 
 
-# Clean and transform the products DataFrame
+# Clean products dataframe
 def transform_products(products):
     products["price"] = products["price"].str.split("\n", expand=True)[1].str.strip().str[:-2].str.replace(",", ".").astype(float)
     products["title"] = products["title"].str.split("\n", expand=True)[0].str.strip().str.title()
@@ -39,7 +38,7 @@ def transform_sizes(sizes):
     return sizes
 
 
-# Process details JSON data and convert to list
+# Process details JSON file and convert to a list
 def transform_details(dct):
     details = []
 
@@ -64,6 +63,7 @@ def transform_details(dct):
     return details
 
 
+# Load transformed data to the bucket
 def load_files(products, sizes, details, logger):
     destination = "web-scraping/clean"
     load_file_to_bucket(products, destination, "products", file_type="csv")
@@ -74,17 +74,11 @@ def load_files(products, sizes, details, logger):
 
 def transform_data(logger):
     logger.info("DATA TRANSFORMATION STARTED ...")
-    t1 = time.perf_counter()
 
-    # Get files from bucket, transform them and load storage
+    # Get files from bucket, transform them and load to storage
     products, sizes, details = get_files(logger)
     products_df = transform_products(products)
     sizes_df = transform_sizes(sizes)
     details_dct = transform_details(details)
     logger.info("Data transformation was successful")
     load_files(products_df, sizes_df, details_dct, logger)
-
-    # Log execution time
-    t2 = time.perf_counter()
-    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
-    logger.info("----------------------------------------------------------------")

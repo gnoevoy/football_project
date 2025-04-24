@@ -26,3 +26,6 @@ def setup_logger(dir, logger_name):
     # Add handler to the logger
     logger.addHandler(file_handler)
     return logger
+
+
+# add logger for scheduler (keep in one centralized place)

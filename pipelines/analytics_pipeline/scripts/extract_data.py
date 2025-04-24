@@ -1,20 +1,21 @@
 from dotenv import load_dotenv
 from pathlib import Path
 import requests
-import time
 import sys
 import os
 
 # Add python path and load variables
 PIPELINES_DIR = Path(__file__).parents[2]
 sys.path.insert(0, str(PIPELINES_DIR))
-load_dotenv(PIPELINES_DIR / ".env")
+ENV_FILE = PIPELINES_DIR / ".env"
+if ENV_FILE.exists():
+    load_dotenv(ENV_FILE)
 
 # Import helper functions
 from utils.cloud_helpers import load_file_to_bucket
 
 API_BASE_URL = os.getenv("API_BASE_URL")
-api_endpoints = ["boots", "balls", "orders"]
+endpoints = ["boots", "balls", "orders"]
 
 
 # Get token for auth
@@ -37,19 +38,15 @@ def get_data(token, endpoint):
 
 
 def extract_data(logger):
-    t1 = time.perf_counter()
     logger.info("EXTRACTING DATA FROM API ...")
 
     # Get token, reach endpoints and load files to bucket
     token = get_token()
     raw_files_dir = "api-pipeline/raw"
 
-    for endpoint in api_endpoints:
+    for endpoint in endpoints:
         data = get_data(token, endpoint)
         load_file_to_bucket(data, raw_files_dir, f"{endpoint}.json", file_type="json")
         logger.info(f"{endpoint.title()} successfully extracted and loaded to bucket")
 
-    # Log extraction time
-    t2 = time.perf_counter()
-    logger.info(f"Script {Path(__file__).name} finished in {round(t2 - t1, 2)} seconds.")
     logger.info("----------------------------------------------------------------")

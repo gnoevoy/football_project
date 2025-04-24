@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from pathlib import Path
 import os
 
-# Load variables
+# Load env variables
 ENV_FILE = Path(__file__).parents[1] / ".env"
 if ENV_FILE.exists():
     load_dotenv(ENV_FILE)

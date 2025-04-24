@@ -8,13 +8,15 @@ import os
 # Add python path and load variables
 PIPELINES_DIR = Path(__file__).parents[2]
 sys.path.insert(0, str(PIPELINES_DIR))
-load_dotenv(PIPELINES_DIR / ".env")
+ENV_FILE = PIPELINES_DIR / ".env"
+if ENV_FILE.exists():
+    load_dotenv(ENV_FILE)
 
 # Import helper functions
 from utils.cloud_helpers import get_file_from_bucket, bigquery_client
 
 
-# Retrieve product and order IDs from BigQuery
+# Retrieve product and order IDs from BigQuery to filter out already existing records
 def get_products_and_orders_ids():
     BIGQUERY_SCHEMA = os.getenv("WAREHOUSE_SCHEMA")
     products_query = bigquery_client.query(f"SELECT product_id FROM {BIGQUERY_SCHEMA}.products").result()
@@ -24,13 +26,14 @@ def get_products_and_orders_ids():
     return products, orders
 
 
-# Get products data in one dataframe
+# Combine products categories together in one dataframe
 def get_products_with_details(product_ids):
     df = pd.DataFrame()
 
     for category in ["boots", "balls"]:
         data = get_file_from_bucket("api-pipeline/raw", f"{category}.json", "json")
         category_id = 1 if category == "boots" else 2
+        # Normalize JSON data, without errors="ignore" argument data will be in a string format (magic)
         category_df = pd.json_normalize(data["products"], errors="ignore")
         category_df["category_name"] = data["category_name"]
         category_df["category_id"] = category_id
@@ -41,9 +44,11 @@ def get_products_with_details(product_ids):
     return df
 
 
-### Normalize products data (create star schema, 5 tables)
+# Normalize product data, create star schema with 5 tables
+# Iterative process of cleaning and transforming data (jupyter notebook in help)
 
 
+# Fact table
 def get_products(df):
     cols = ["product_id", "created_at", "title", "price", "old_price", "description", "avg_vote_rate", "num_votes", "category_id"]
     products = df[cols]
@@ -52,6 +57,7 @@ def get_products(df):
     return products
 
 
+# The rest of the tables are dimension tables
 def get_labels(df):
     labels = df[["product_id", "labels"]].explode("labels").dropna().rename(columns={"labels": "label"})
     labels["label"] = labels["label"].astype(str)

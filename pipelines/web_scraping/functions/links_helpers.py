@@ -11,7 +11,7 @@ def open_catalog(playwrigth, url):
     return page, browser
 
 
-# Handle cookie consent dialog and ensure it is closed
+# Handle cookie pop up and ensure it is closed
 def handle_cookies(page):
     cookie = page.locator("div.CybotCookiebotDialogActive")
     cookie.wait_for()
@@ -29,6 +29,7 @@ def get_total_items(page):
 
 # Scrape product links from the page
 def get_links(page, data, logger):
+    # Render html
     html = page.content()
     soup = BeautifulSoup(html, "html.parser")
     items = soup.select("div.category-grid__item:not(.last-brick)")
@@ -39,7 +40,7 @@ def get_links(page, data, logger):
         try:
             url = item.find("a")["href"]
             product_id = int(url.split("-")[-1])
-            # Add URL to the list if the product is not already scraped
+            # Add URL to the list if the product is not already scraped (not in db)
             if product_id not in data:
                 lst.append(url)
                 scraped_num += 1

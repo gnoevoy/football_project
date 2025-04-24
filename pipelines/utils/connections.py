@@ -8,7 +8,8 @@ import os
 
 # Import environment variables
 ROOT_DIR = Path(__file__).parents[1]
-load_dotenv(ROOT_DIR / ".env")
+if ROOT_DIR.exists():
+    load_dotenv(ROOT_DIR / ".env")
 
 # Postgres connection
 USER = os.getenv("POSTGRES_USER")

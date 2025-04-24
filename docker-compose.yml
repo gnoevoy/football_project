@@ -1,6 +1,6 @@
 services:
 
-  # scheduler for pipelines 
+  # Scheduler for pipelines 
   scheduler:
     build:
       context: ./pipelines
@@ -9,6 +9,7 @@ services:
     restart: always
     volumes:
       - ./pipelines:/app
+      # Get access to cloud services via key json file
       - ./pipelines/google_cloud_key.json:/app/google_cloud_key.json
     env_file:
       - ./pipelines/.env
@@ -17,7 +18,7 @@ services:
       - mongo-db
       - fastapi
 
-  # rest api 
+  # REST API
   fastapi:
     build:
       context: ./rest_api
@@ -34,7 +35,7 @@ services:
       - postgres-db
       - mongo-db
 
-  # postgres db
+  # Postgres db
   postgres-db:
     image: postgres:16
     container_name: postgres-db
@@ -54,7 +55,7 @@ services:
     volumes:
       - postgres-db:/var/lib/postgresql/data
 
-  # ui for postgres
+  # UI for postgres
   adminer:
     image: adminer
     container_name: adminer-postgres
@@ -64,7 +65,7 @@ services:
     depends_on:
       - postgres-db
 
-  # mongo db
+  # Mongo db
   mongo-db:
     image: mongo
     container_name: mongo-db
@@ -76,7 +77,7 @@ services:
     volumes:
       - mongo-db:/data/db
 
-  # ui for mongo
+  # UI for mongo
   mongo-express:
     image: mongo-express
     container_name: mongo-express
@@ -86,6 +87,7 @@ services:
     env_file:
       - .docker_env
 
+# Persistent data in databases
 volumes:
   postgres-db:
   mongo-db:

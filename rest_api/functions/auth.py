@@ -1,17 +1,18 @@
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi import Depends, HTTPException, status
 from datetime import datetime, timedelta
-from jose import JWTError, jwt
 from passlib.context import CryptContext
-from sqlalchemy import text
-from dotenv import load_dotenv
+from jose import JWTError, jwt
 from pydantic import BaseModel
+from dotenv import load_dotenv
+from sqlalchemy import text
 from pathlib import Path
 import os
 
 # Load environment variables
 ENV_PATH = Path(__file__).parents[1] / ".env"
-load_dotenv(ENV_PATH)
+if ENV_PATH.exists():
+    load_dotenv(ENV_PATH)
 
 # Import connection
 from .connections import engine
