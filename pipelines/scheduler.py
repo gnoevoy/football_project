@@ -1,17 +1,30 @@
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.executors.pool import ThreadPoolExecutor
 from pathlib import Path
 import time
+import pytz
 
-# Import scripts and logger
+# Import scripts, db engine and logger
 from orders_generator.main import orders_generator
 from web_scraping.main import web_scraping
 from analytics_pipeline.main import analytics_pipeline
-from utils.scheduler_helpers import create_scheduler, sheduler_logger
-
-# add scheduelr set up in function
-# place scheduler logger to logger file (try not to screw up )
+from utils.logger import sheduler_logger
+from utils.connections import engine
 
 
-def run_scheduler():
+# Create scheduler with configurations
+def create_scheduler():
+    timezone = pytz.timezone("Europe/Warsaw")
+    # Combine all missed jobs into one and execute it if scheduled time is within the last 5 days
+    job_defaults = {"coalesce": True, "max_instances": 1, "misfire_grace_time": 432000}
+    executors = {"default": ThreadPoolExecutor(5)}
+    jobstores = {"postgres": SQLAlchemyJobStore(engine=engine, tableschema="public", tablename="scheduler")}
+    scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=timezone)
+    return scheduler
+
+
+def main():
     try:
         # Set up logger
         LOGS_DIR = Path(__file__).parent / "logs" / "scheduler"
@@ -28,11 +41,11 @@ def run_scheduler():
         #     analytics_pipeline, trigger="cron", day="*/3", hour=10, minute=10, id="analytics_pipeline", replace_existing=True, jobstore="postgres"
         # )
 
-        # scheduler.add_job(orders_generator, trigger="cron", minute="*/2", id="orders_generator", replace_existing=True, jobstore="postgres")
-        scheduler.add_job(web_scraping, trigger="cron", minute="*/2", id="web_scraping", replace_existing=True, jobstore="postgres")
+        scheduler.add_job(orders_generator, trigger="cron", minute="*", id="orders_generator", replace_existing=True, jobstore="postgres")
+        # scheduler.add_job(web_scraping, trigger="cron", minute="*/2", id="web_scraping", replace_existing=True, jobstore="postgres")
         # scheduler.add_job(analytics_pipeline, trigger="cron", minute="*/2", id="analytics_pipeline", replace_existing=True, jobstore="postgres")
 
-        scheduler.pause_job("orders_generator")
+        scheduler.pause_job("web_scraping")
         scheduler.pause_job("analytics_pipeline")
 
         # Get next run time for each job
@@ -44,8 +57,8 @@ def run_scheduler():
             time.sleep(1)
     except:
         logger.error("", exc_info=True)
-        scheduler.shutdown()
+        scheduler.shutdown(wait=False)
 
 
 if __name__ == "__main__":
-    run_scheduler()
+    main()
