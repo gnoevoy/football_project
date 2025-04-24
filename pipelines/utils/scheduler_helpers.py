@@ -12,20 +12,21 @@ PIPELINES_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(PIPELINES_DIR))
 from utils.connections import engine
 
+# Set my timezone
+timezone = pytz.timezone("Europe/Warsaw")
+
 
 def create_scheduler():
     # Configurations
-    timezone = pytz.timezone("Europe/Warsaw")
     job_defaults = {"coalesce": True, "max_instances": 1}
     executors = {"default": ThreadPoolExecutor(5)}
     jobstores = {"postgres": SQLAlchemyJobStore(engine=engine, tableschema="public", tablename="scheduler")}
-
     scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=timezone)
     return scheduler
 
 
 def sheduler_logger(logs_dir):
-    timestamp = datetime.now().strftime("%m-%d_%H:%M:%S")
+    timestamp = datetime.now(timezone).strftime("%m-%d_%H:%M:%S")
     file_name = f"{logs_dir}/logs_{timestamp}.log"
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s", datefmt="%Y-%m-%d_%H:%M:%S")
 

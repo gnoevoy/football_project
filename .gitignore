@@ -8,8 +8,11 @@ example.py
 
 # logs
 logs/
-.log
+*.log
 
 # env variables
 .env
 .docker_env
+
+# cloud credentials
+google_cloud_key.json

@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 # Launch browser with image blocking
 def open_catalog(playwrigth, url):
-    browser = playwrigth.chromium.launch(headless=False)
+    browser = playwrigth.chromium.launch(headless=True)
     page = browser.new_page()
     page.route("**/*.{webp,png,jpeg,jpg}", lambda route: route.abort())
     page.goto(url)

@@ -23,13 +23,11 @@ def run_scheduler():
             logger.info(job)
 
         # Jobs
-        # scheduler.add_job(web_scraping, "cron", hour=10, minute=10, day="*/3", id="web_scraping", replace_existing=True, jobstore="postgres")
-        # scheduler.add_job(orders_generator, "cron", hour=10, minute=0, id="orders_generator", replace_existing=True, jobstore="postgres")
-
-        # test jobs for local and docker
-        scheduler.add_job(orders_generator, trigger="cron", minute="*", id="orders_generator", replace_existing=True, jobstore="postgres")
-        scheduler.add_job(web_scraping, trigger="cron", minute="*/2", id="web_scraping", replace_existing=True, jobstore="postgres")
-        scheduler.add_job(analytics_pipeline, trigger="cron", minute="*/2", id="analytics_pipeline", replace_existing=True, jobstore="postgres")
+        scheduler.add_job(orders_generator, trigger="cron", hour=10, minute=0, id="orders_generator", replace_existing=True, jobstore="postgres")
+        scheduler.add_job(web_scraping, trigger="cron", day="*/3", hour=10, minute=5, id="web_scraping", replace_existing=True, jobstore="postgres")
+        scheduler.add_job(
+            analytics_pipeline, trigger="cron", day="*/3", hour=10, minute=10, id="analytics_pipeline", replace_existing=True, jobstore="postgres"
+        )
 
         # Infinite loop to run scheduler
         while True:

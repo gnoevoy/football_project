@@ -1,10 +1,12 @@
 from datetime import datetime
 import logging
+import pytz
 
 
 def setup_logger(dir, logger_name):
     # Createa a file name with timestamp
-    timestamp = datetime.now().strftime("%m-%d_%H:%M:%S")
+    timezone = pytz.timezone("Europe/Warsaw")
+    timestamp = datetime.now(timezone).strftime("%m-%d_%H:%M:%S")
     file_name = f"{dir}/logs_{timestamp}.log"
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(filename)s | %(message)s", datefmt="%Y-%m-%d_%H:%M:%S")
 

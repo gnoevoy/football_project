@@ -1,6 +1,23 @@
 services:
 
-  # rest api with products and orders data
+  # scheduler for pipelines 
+  scheduler:
+    build:
+      context: ./pipelines
+      dockerfile: Dockerfile
+    container_name: scheduler
+    restart: always
+    volumes:
+      - ./pipelines:/app
+      - ./pipelines/google_cloud_key.json:/app/google_cloud_key.json
+    env_file:
+      - ./pipelines/.env
+    depends_on:
+      - postgres-db
+      - mongo-db
+      - fastapi
+
+  # rest api 
   fastapi:
     build:
       context: ./rest_api
